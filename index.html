@@ -66,7 +66,6 @@ body{font-family:var(--f-body);font-size:15px;line-height:1.5;
     radial-gradient(30% 12% at 33% 0%,rgba(92,42,64,.28),transparent 70%),
     radial-gradient(34% 14% at 76% 2%,rgba(92,42,64,.38),transparent 72%),
     radial-gradient(26% 11% at 97% 10%,rgba(92,42,64,.3),transparent 70%),
-    linear-gradient(90deg,transparent calc(16% - 2px),rgba(43,24,40,.2) calc(16% - 2px) 16%,transparent 16% calc(84% - 2px),rgba(43,24,40,.2) calc(84% - 2px) 84%,transparent 84%),
     linear-gradient(180deg,#f4bdab 0,#e8a3a0 240px,#c98597 560px,#8c5874 900px,#4a3047 1250px,var(--room) 1600px);
   background-repeat:no-repeat;background-size:100% 1600px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
@@ -353,7 +352,6 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
 .view3d.hover{cursor:pointer}
 .view3d.dragging{cursor:grabbing}
 .view3d canvas{display:block;width:100%;height:100%;outline:none}
-.view3d canvas:focus-visible{outline:2px solid var(--rose);outline-offset:-2px}
 .wrap:focus{outline:none}
 .dom-machine{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .dom-machine.fallback{position:static;width:auto;height:auto;overflow:visible;clip-path:none;white-space:normal}
@@ -405,11 +403,12 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
 :root{--f-cover:"Dela Gothic One","Arial Black",sans-serif;--f-ui:"Geist",system-ui,sans-serif;--f-mono:"Geist Mono",ui-monospace,monospace;--f-jp:"Zen Kaku Gothic New","Hiragino Sans",sans-serif;--cover-ink:#26121e}
 body{font-family:var(--f-ui)}
 .wrap{gap:18px}
-.cover{position:relative}
-.cover-title{position:absolute;left:0;top:6px;z-index:0;margin:0;pointer-events:none;font-family:var(--f-cover);font-weight:400;font-size:clamp(64px,14.5vw,208px);line-height:.86;letter-spacing:-.02em;text-transform:uppercase;color:var(--cover-ink);opacity:.92}
+.cover{position:relative;margin-top:-28px}  /* reach the top of the window too */
+.cover-title{position:absolute;left:0;top:34px;z-index:0;margin:0;pointer-events:none;font-family:var(--f-cover);font-weight:400;font-size:clamp(64px,14.5vw,208px);line-height:.86;letter-spacing:-.02em;text-transform:uppercase;color:var(--cover-ink);opacity:.92}
 .cover-title .jp{display:block;margin-top:.24em;font-family:var(--f-jp);font-size:max(13px,.105em);font-weight:700;line-height:1.4;letter-spacing:.5em;opacity:.78}
-.cover .view3d{z-index:1;height:min(calc(100vh - 56px),860px)}
-.viewbar{position:absolute;top:8px;right:0;z-index:2;flex-direction:column;align-items:flex-end;gap:12px;font-family:var(--f-mono);color:var(--cover-ink)}
+html,body{overflow-x:clip}
+.cover .view3d{z-index:1;height:min(calc(100vh - 28px),888px);margin-inline:calc(50% - 50vw)}  /* bleed to the window edges so a zoomed machine is never boxed in */
+.viewbar{position:absolute;top:36px;right:0;z-index:2;flex-direction:column;align-items:flex-end;gap:12px;font-family:var(--f-mono);color:var(--cover-ink)}
 .viewbar .vlabel{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.16em;color:var(--sky-muted)}
 .viewbar button{font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--sky-muted);margin:0;padding:2px 0}
 .viewbar button:hover{color:var(--cover-ink)}
@@ -427,8 +426,8 @@ body{font-family:var(--f-ui)}
 .cc-foot,.cc-foot button,.cc-actions button{font-size:11.5px}
 .cc-list b{font-weight:600}
 @media (max-width:700px){
-  .cover-title{top:62px}
-  .viewbar{position:relative;top:0;flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:8px 16px;margin-bottom:6px}
+  .cover-title{top:90px}
+  .viewbar{position:absolute;top:36px;left:0;right:0;flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:8px 16px;margin-bottom:6px}
   .viewbar .teach{margin:0}
   .viewbar .vhint{display:none}
   .cover .view3d{height:min(118vw,calc(100vh - 150px))}

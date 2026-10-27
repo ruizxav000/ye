@@ -7,7 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Michroma&family=Barlow:wght@400;500;600;700&family=VT323&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Dela+Gothic+One&family=Geist+Mono:wght@400;500&family=Geist:wght@300..700&family=Michroma&family=VT323&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
 <style>
 /* Layout: a 2000XL-style machine in 3D under a "Runaway" dusk: rose sky fading to plum, cream and gold accents. Left: LCD in its black bezel, F1–F6, keypad and data wheel, note variation and transport. Right: logo, teal control strip, teal pad field. The step editor sits below as a matching panel. Single deliberate look. */
 :root{
@@ -400,13 +400,46 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
   .pad.hit::before,.pad.hit::after{animation-duration:.2s}
   .led.blink,.fld.edit{animation:none}
 }
+
+/* ---------- Cover: one big gesture, the machine floating in front of its own name ---------- */
+:root{--f-cover:"Dela Gothic One","Arial Black",sans-serif;--f-ui:"Geist",system-ui,sans-serif;--f-mono:"Geist Mono",ui-monospace,monospace;--f-jp:"Zen Kaku Gothic New","Hiragino Sans",sans-serif;--cover-ink:#26121e}
+body{font-family:var(--f-ui)}
+.wrap{gap:18px}
+.cover{position:relative}
+.cover-title{position:absolute;left:0;top:6px;z-index:0;margin:0;pointer-events:none;font-family:var(--f-cover);font-weight:400;font-size:clamp(64px,14.5vw,208px);line-height:.86;letter-spacing:-.02em;text-transform:uppercase;color:var(--cover-ink);opacity:.92}
+.cover-title .jp{display:block;margin-top:.24em;font-family:var(--f-jp);font-size:max(13px,.105em);font-weight:700;line-height:1.4;letter-spacing:.5em;opacity:.78}
+.cover .view3d{z-index:1;height:min(calc(100vh - 56px),860px)}
+.viewbar{position:absolute;top:8px;right:0;z-index:2;flex-direction:column;align-items:flex-end;gap:12px;font-family:var(--f-mono);color:var(--cover-ink)}
+.viewbar .vlabel{font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.16em;color:var(--sky-muted)}
+.viewbar button{font-family:var(--f-mono);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--sky-muted);margin:0;padding:2px 0}
+.viewbar button:hover{color:var(--cover-ink)}
+.viewbar button[aria-pressed="true"]{color:var(--cover-ink);border-bottom-color:var(--cover-ink)}
+.viewbar .teach{margin:10px 0 0;padding:2px 0;border-left:0;border-bottom:2px solid var(--cover-ink);font-family:var(--f-mono);font-style:normal;font-size:12px;font-weight:500;color:var(--cover-ink);line-height:1.4}
+.viewbar .vhint{flex-basis:auto;max-width:16ch;margin-top:6px;text-align:right;font-family:var(--f-mono);font-size:10.5px;line-height:1.55;letter-spacing:.04em;text-transform:uppercase;color:var(--sky-muted)}
+.status{font-family:var(--f-ui);margin-top:0}
+.seqhead h2{font-family:var(--f-mono);font-size:13px;font-weight:500;letter-spacing:.16em}
+.seqhead p{font-family:var(--f-ui)}
+.notes{font-family:var(--f-ui)}
+.notes h3{font-family:var(--f-mono);font-style:normal;font-size:12px;font-weight:500;line-height:1.5;letter-spacing:.16em;text-transform:uppercase;color:#f9d6cc}
+.coach{font-family:var(--f-ui)}
+.cc-kicker,.cc-foot,.cc-foot button,.cc-actions button{font-family:var(--f-mono);letter-spacing:.1em;text-transform:uppercase}
+.cc-kicker{font-size:11px;color:#8a6428}
+.cc-foot,.cc-foot button,.cc-actions button{font-size:11.5px}
+.cc-list b{font-weight:600}
+@media (max-width:700px){
+  .cover-title{top:62px}
+  .viewbar{position:relative;top:0;flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:8px 16px;margin-bottom:6px}
+  .viewbar .teach{margin:0}
+  .viewbar .vhint{display:none}
+  .cover .view3d{height:min(118vw,calc(100vh - 150px))}
+}
 </style>
 </head>
 <body>
 <main class="wrap" tabindex="-1">
-  <header class="intro">
-    <h1>MPC 2000XL</h1>
-    <div class="viewbar" role="group" aria-label="View and lessons">
+  <section class="cover" aria-label="MPC 2000XL">
+    <h1 class="cover-title">MPC<br>2000XL<span class="jp" lang="ja">エムピーシー・ニセン</span></h1>
+    <nav class="viewbar" aria-label="View and lessons">
       <span class="vlabel">View</span>
       <button data-view="three" aria-pressed="true">Three-quarter</button>
       <button data-view="play">Play</button>
@@ -414,10 +447,10 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
       <button data-view="back">Back</button>
       <button class="teach" id="teachBtn">Lessons</button>
       <span class="vhint">Drag around the machine to spin it. Pads zooms in for playing.</span>
-    </div>
-  </header>
+    </nav>
 
-  <div class="view3d" id="view3d"><canvas id="c3d" tabindex="0" aria-label="3D model of the sampler. Every control is also reachable from the keyboard."></canvas></div>
+    <div class="view3d" id="view3d"><canvas id="c3d" tabindex="0" aria-label="3D model of the sampler. Every control is also reachable from the keyboard."></canvas></div>
+  </section>
   <div class="dom-machine" id="domMachine">
   <section class="unit" aria-label="MPC 2000XL">
     <div class="face front" aria-hidden="true"><span class="fronttxt">AKAI professional</span><span class="floppy"></span><span class="fled"></span><span class="fdesc">3.5" HD floppy · 1.44 MB</span></div>
@@ -1528,7 +1561,7 @@ const LESSONS = [
     {text:"Now <b>pad 2</b>, the snare (<kbd>X</kbd>). The keyboard mirrors the pads: <kbd>Z</kbd>–<kbd>V</kbd> is the bottom row, then <kbd>A</kbd>–<kbd>F</kbd>, <kbd>Q</kbd>–<kbd>R</kbd>, and <kbd>1</kbd>–<kbd>4</kbd> on top.", target:() => padEls[1], on:(t, d) => t === "pad" && d.i === 1},
     {text:"Each pad glows in its family's color: red for drums, amber for hats, blue for keys, purple for voices. Tap any pad on the <b>top row</b>.", target:() => padEls.slice(12), on:(t, d) => t === "pad" && d.i >= 12},
     {text:"The screen shows the last pad you hit next to <b>Pad:</b>. Now turn <b>Main volume</b> by dragging the knob up or down.", target:() => $("#volKnob"), on:(t, d) => t === "knob" && d.name === "vol"},
-    {text:"Last one: press a <b>View</b> button above the machine. Try <b>Back</b> to see the jacks, or drag around it to spin it.", target:() => [...document.querySelectorAll("[data-view]")], on:t => t === "view"},
+    {text:"Last one: press one of the <b>View</b> buttons. Try <b>Back</b> to see the jacks, or drag around the machine to spin it.", target:() => [...document.querySelectorAll("[data-view]")], on:t => t === "view"},
   ], outro:"You know where every sound lives."},
   {title:"Play a loop", blurb:"Start, switch and stop sequences.", steps:[
     {text:"Under <b>Sequence</b>, press <b>A</b>. Each sequence is one loop.", target:() => seqBtn(0), on:(t, d) => t === "seq" && d.n === 0},
@@ -2300,9 +2333,10 @@ function init3D(){
   }
 
   // ---- frame loop
-  const glow = new Float32Array(16), held3 = new Set(); let lcdSig = "";
+  const glow = new Float32Array(16), held3 = new Set(); let lcdSig = "", lastT = 0;
   function loop(now){
     requestAnimationFrame(loop);
+    const fade = Math.pow(.9, Math.min(10, (now - (lastT || now)) / 16.7)); lastT = now;  // same fade speed at any frame rate
     if (anim){
       const k = Math.min(1, (now - anim.t0) / 750), e = 1 - Math.pow(1 - k, 3);
       for (const key of ["az", "el", "zoom", "tx", "tz"]) cam[key] = anim.from[key] + (anim.to[key] - anim.from[key]) * e;
@@ -2313,7 +2347,7 @@ function init3D(){
     const pulse = .5 + .5 * Math.sin(now / 170);
     for (let i = 0; i < 16; i++){
       const pm = padMeshes[i], down = held3.has(i);
-      glow[i] = Math.max(down ? .6 : 0, glow[i] * .9);
+      glow[i] = Math.max(down ? .6 : 0, glow[i] * fade);
       let col = GLOWHEX[PADS[levels16 ? levelSrc : i].g], amt = glow[i];
       if (hlPads.has(i) && amt < .15){ col = 0xd9466f; amt = .12 + pulse * .3; }
       pm.material[0].emissive.setHex(col); pm.material[0].emissiveIntensity = amt * 1.5;

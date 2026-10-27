@@ -81,9 +81,9 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
 
 /* ---------- chassis ---------- */
 .unit{position:relative;width:1100px;left:50%;margin-left:-550px;aspect-ratio:408/375;border-radius:6px;padding:24px 30px 30px;color:var(--ink);
-  background:linear-gradient(180deg,var(--body-hi),var(--body) 35%,var(--body-lo));
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.65),inset 0 -3px 0 rgba(0,0,0,.1);
-  display:grid;gap:22px 36px;align-items:start;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),radial-gradient(120% 70% at 30% 0%,rgba(255,255,255,.35),transparent 60%),linear-gradient(180deg,var(--body-hi),var(--body) 35%,var(--body-lo));
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.7),inset 2px 0 0 rgba(255,255,255,.35),inset -2px 0 0 rgba(0,0,0,.06),inset 0 -3px 0 rgba(0,0,0,.12);
+  display:grid;gap:16px 36px;align-items:start;
   grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
   grid-template-areas:"lcd brand" "lcd panel" "clus pads" "low pads";align-content:center;
   transform-style:preserve-3d;transform-origin:50% 45%;transform:scale3d(var(--sc,1),var(--sc,1),var(--sc,1)) rotateX(var(--rx,0deg)) rotateZ(var(--rz,0deg))}
@@ -290,12 +290,12 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
 .face{position:absolute;pointer-events:none}
 .face.front{left:0;right:0;top:100%;height:var(--th);transform-origin:top;transform:rotateX(-90deg);background:linear-gradient(180deg,#cfcbc1,#b1ada3);border-radius:0 0 3px 3px}
 .face.back{left:0;right:0;bottom:100%;height:var(--th);transform-origin:bottom;transform:rotateX(90deg);background:linear-gradient(180deg,#c9c5bc,#b1ada4)}
-.backpanel{position:absolute;inset:0;transform:rotate(180deg);display:grid;align-content:center;gap:8px;padding:0 3%}
+.backpanel{position:absolute;inset:0;transform:rotate(180deg);display:grid;align-content:center;padding:4px 3%;overflow:hidden}
 .bp-inner{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;background:linear-gradient(180deg,#232427,#17181a);border-radius:3px;padding:18px 24px 12px;color:#c3c7cb;box-shadow:inset 0 2px 5px #000}
 .bp-foot{display:flex;justify-content:space-between;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#5f5c57;padding:0 6px}
-.scsi{display:block;width:130px;height:24px;border-radius:3px;background:linear-gradient(180deg,#d6d9dd,#8a8e94);box-shadow:inset 0 0 0 5px #9fa3a8}
-.pwr{display:block;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,#3a3a3d 40%,#0f0f10 43%)}
-.ac{display:block;width:54px;height:38px;border-radius:5px;background:#0d0d0e;box-shadow:inset 0 0 0 4px #3a3b3e}
+.scsi{display:block;width:120px;height:20px;border-radius:3px;background:linear-gradient(180deg,#d6d9dd,#8a8e94);box-shadow:inset 0 0 0 5px #9fa3a8}
+.pwr{display:block;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,#3a3a3d 40%,#0f0f10 43%)}
+.ac{display:block;width:48px;height:32px;border-radius:5px;background:#0d0d0e;box-shadow:inset 0 0 0 4px #3a3b3e}
 .face.left{top:0;bottom:0;right:100%;width:var(--th);transform-origin:right;transform:rotateY(-90deg);background:radial-gradient(circle at 50% 14%,#8f8b84 0 5px,transparent 6px),radial-gradient(circle at 50% 86%,#8f8b84 0 5px,transparent 6px),linear-gradient(90deg,#a8a49a,#c9c5bb)}
 .face.right{top:0;bottom:0;left:100%;width:var(--th);transform-origin:left;transform:rotateY(90deg);background:radial-gradient(circle at 50% 14%,#8f8b84 0 5px,transparent 6px),radial-gradient(circle at 50% 86%,#8f8b84 0 5px,transparent 6px),linear-gradient(90deg,#c9c5bb,#a8a49a)}
 .face.bottom{inset:0;transform:translateZ(calc(-1 * var(--th)));background:#4d4a44}
@@ -304,10 +304,49 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
 .floppy::before{content:"";position:absolute;left:7%;right:24%;top:42%;height:3px;background:#030303;border-radius:2px}
 .floppy::after{content:"";position:absolute;right:6%;top:28%;width:12%;height:44%;background:#d2cec5;border-radius:2px}
 .fronttxt{position:absolute;right:5%;top:62%;transform:translateY(-50%);font-family:var(--f-logo);font-size:22px;letter-spacing:.14em;color:#8a8780;text-transform:uppercase;white-space:nowrap}
-.jg{display:grid;justify-items:center;gap:7px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
+.jg{display:grid;justify-items:center;gap:4px;font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase}
 .jrow{display:flex;gap:9px}
-.jack{position:relative;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,#0b0b0c 0 28%,#c9ccd0 31%,#8d9196 62%,#5d6166);transform:translateZ(4px);--ex:#4f5358}
-.jack.din{width:40px;height:40px;background:radial-gradient(circle,#18191b 0 54%,#a9adb2 57%,#6c7075)}
+.jack{position:relative;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle,#0b0b0c 0 28%,#c9ccd0 31%,#8d9196 62%,#5d6166);transform:translateZ(4px);--ex:#4f5358}
+.jack.din{width:34px;height:34px;background:radial-gradient(circle,#18191b 0 54%,#a9adb2 57%,#6c7075)}
+
+/* ---------- hardware detail ---------- */
+.pad .pk{top:6px;right:7px;font-size:10px;font-weight:700;color:rgba(255,255,255,.6);border:1px solid rgba(255,255,255,.28);border-radius:3px;padding:0 4px;line-height:1.45}
+.pad{background-image:radial-gradient(circle at 28% 18%,rgba(255,255,255,.1),transparent 55%),linear-gradient(180deg,var(--pad-hi),var(--pad) 45%,var(--pad-lo))}
+.keypad .sub{font-size:7.5px;font-weight:700;letter-spacing:.05em;color:var(--ink-soft);text-transform:uppercase;white-space:nowrap;line-height:1;margin-top:-1px}
+.locate{display:grid;gap:5px}
+.locate .rule{display:flex;align-items:center;gap:8px;font-size:9.5px;font-weight:700;letter-spacing:.16em;color:var(--ink-soft);text-transform:uppercase}
+.locate .rule::before,.locate .rule::after{content:"";flex:1;border-top:1px solid rgba(58,59,63,.45)}
+.lrow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.lrow .cap{width:100%;min-width:0;min-height:28px}
+.knobring{position:relative;width:78px;height:78px;display:grid;place-items:center}
+.knobring::before{content:"";position:absolute;inset:0;border-radius:50%;
+  background:conic-gradient(from 135deg,#80b0ae 0 90deg,transparent 90deg),repeating-conic-gradient(from -136deg,var(--teal-ink) 0 3deg,transparent 3deg 27deg);
+  -webkit-mask:radial-gradient(circle,transparent 0 63%,#000 64% 71%,transparent 72%);mask:radial-gradient(circle,transparent 0 63%,#000 64% 71%,transparent 72%)}
+.knob>.ex{background:repeating-conic-gradient(#8f8b83 0 6deg,#aaa69d 6deg 12deg)}
+.knob.hot{background:radial-gradient(circle at 40% 30%,#ff9a84,#d8452f 55%,#a32f1f)}
+.knob.hot .ind::after{background:#fff}
+.wheel>.ex{background:repeating-conic-gradient(#101113 0 4deg,#272a2e 4deg 8deg)}
+.wheel::after{content:"";position:absolute;inset:8%;border-radius:50%;pointer-events:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.07),0 0 0 1px rgba(0,0,0,.55)}
+.bz-back{background:repeating-linear-gradient(90deg,#0b0c0e 0 9px,#1c1e21 9px 11px)}
+.lcd::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:1;background:linear-gradient(118deg,rgba(255,255,255,.24),rgba(255,255,255,0) 36%,rgba(255,255,255,0) 80%,rgba(255,255,255,.08))}
+.fled{position:absolute;left:5%;top:66%;width:12px;height:6px;border-radius:2px;background:#3b4f33;box-shadow:inset 0 1px 1px rgba(0,0,0,.5);transition:background .1s}
+.fled.on{background:#86ff6a;box-shadow:0 0 8px #86ff6a}
+.fdesc{position:absolute;left:7.5%;top:63%;font-size:12px;font-weight:600;letter-spacing:.08em;color:#8a877f;text-transform:uppercase;white-space:nowrap}
+.face.left::after{content:"";position:absolute;left:24%;right:24%;top:34%;height:24%;border-radius:3px;background:repeating-linear-gradient(90deg,#bdbab3 0 2px,transparent 2px 9px) 18% 50%/64% 70% no-repeat,#f3f1ec;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.face.right::after{content:"";position:absolute;left:34%;right:34%;top:36%;height:24%;border-radius:3px;background:repeating-linear-gradient(180deg,#8d8981 0 4px,transparent 4px 13px)}
+.bp-inner{flex-direction:column;align-items:stretch;gap:8px;padding:10px 22px 8px}
+.bp-row{display:flex;align-items:flex-end;justify-content:space-between;gap:14px}
+.jg small{display:block;font-size:9px;letter-spacing:.14em;color:#8f959b;border-top:1px solid #5d6268;padding-top:2px;margin-top:1px;text-align:center}
+.plug{display:block;width:21px;height:21px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#f4f4f2,#d2d2cf 70%,#a6a6a3)}
+.rca{position:relative;width:28px;height:28px;border-radius:50%;background:radial-gradient(circle,#111 0 18%,#e3c46c 21% 38%,#c3c5c8 41% 62%,#6d7075 65%);transform:translateZ(4px);--ex:#55595e}
+.barcode{display:block;width:110px;height:16px;margin-top:3px;background:repeating-linear-gradient(90deg,#111 0 2px,#f2f2ee 2px 3px,#111 3px 4px,#f2f2ee 4px 7px),#f2f2ee;border:3px solid #f2f2ee;border-radius:1px}
+.sticker{width:170px;background:#ecebe5;color:#3b3b3b;font-size:8.5px;line-height:1.3;padding:5px 7px;border-radius:2px;text-transform:uppercase;align-self:center}
+.sticker b{display:block;font-size:10px;letter-spacing:.1em}
+.warn{max-width:220px;font-size:8.5px;line-height:1.3;color:#b6babe;text-transform:uppercase;letter-spacing:.04em}
+.plate{display:grid;gap:2px;border:1px solid #8d939a;border-radius:2px;padding:4px 8px;font-size:9.5px;font-weight:700;letter-spacing:.12em;color:#c3c7cb;text-transform:uppercase}
+.bscrew{position:absolute;width:12px;height:12px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#d9dbde,#8b8f94 70%);box-shadow:0 1px 1px rgba(0,0,0,.35)}
+.bscrew::after{content:"";position:absolute;left:2px;right:2px;top:5px;height:2px;background:#5d6166;transform:rotate(40deg)}
+.bscrew.a{left:1.2%;top:10%}.bscrew.b{right:1.2%;top:10%}.bscrew.c{left:1.2%;bottom:10%}.bscrew.d{right:1.2%;bottom:10%}
 
 /* ---------- lessons ---------- */
 .viewbar .teach{margin-left:18px;padding-left:18px;border-left:1px solid rgba(59,34,51,.3);font-family:var(--f-serif);font-style:italic;font-size:21px;font-weight:600;color:var(--sky-ink);line-height:1}
@@ -370,18 +409,28 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
   <div class="stage" id="stage">
     <div class="shadowrig" aria-hidden="true"><div class="floatshadow"></div></div>
   <section class="unit" aria-label="MPC 2000XL">
-    <div class="face front" aria-hidden="true"><span class="fronttxt">AKAI professional</span><span class="floppy"></span></div>
+    <div class="face front" aria-hidden="true"><span class="fronttxt">AKAI professional</span><span class="floppy"></span><span class="fled"></span><span class="fdesc">3.5" HD floppy · 1.44 MB</span></div>
     <div class="face back" aria-hidden="true">
       <div class="backpanel">
+        <i class="bscrew a"></i><i class="bscrew b"></i><i class="bscrew c"></i><i class="bscrew d"></i>
         <div class="bp-inner">
-          <div class="jg"><div class="jrow"><span class="jack" data-depth="3.5"></span><span class="jack" data-depth="3.5"></span><span class="jack" data-depth="3.5"></span></div>Phones · Stereo out R · L</div>
-          <div class="jg"><div class="jrow"><span class="jack" data-depth="3.5"></span><span class="jack" data-depth="3.5"></span></div>Record in R · L</div>
-          <div class="jg"><div class="jrow"><span class="jack din" data-depth="3.5"></span><span class="jack din" data-depth="3.5"></span></div>MIDI out B · A</div>
-          <div class="jg"><div class="jrow"><span class="jack din" data-depth="3.5"></span><span class="jack din" data-depth="3.5"></span></div>MIDI in 2 · 1</div>
-          <div class="jg"><div class="jrow"><span class="scsi"></span></div>SCSI</div>
-          <div class="jg"><div class="jrow"><span class="pwr"></span><span class="ac"></span></div>Power</div>
+          <div class="bp-row">
+            <div class="jg"><div class="jrow"><span class="jack" data-depth="3.5"></span><span class="jack" data-depth="3.5"></span><span class="jack" data-depth="3.5"></span></div>Phones · Right · Left<small>Stereo out</small></div>
+            <div class="jg"><div class="jrow"><span class="jack" data-depth="3.5"></span><span class="jack" data-depth="3.5"></span></div>Right · Left<small>Record in</small></div>
+            <div class="jg"><div class="jrow"><span class="jack din" data-depth="3.5"></span><span class="jack din" data-depth="3.5"></span></div>B · A<small>MIDI out</small></div>
+            <div class="jg"><div class="jrow"><span class="jack din" data-depth="3.5"></span><span class="jack din" data-depth="3.5"></span></div>2 · 1<small>MIDI in</small></div>
+            <div class="jg"><span class="scsi"></span><span class="barcode"></span>SCSI</div>
+            <div class="sticker"><b>Warning</b>Shock hazard. Do not open. Refer servicing to qualified personnel.</div>
+            <div class="jg"><div class="jrow"><span class="pwr"></span><span class="ac"></span></div>On · Off<small>Power</small></div>
+          </div>
+          <div class="bp-row">
+            <div class="jg"><div class="jrow"><span class="plug"></span><span class="plug"></span></div>Out · In<small>Digital</small></div>
+            <div class="jg"><div class="jrow"><span class="plug"></span><span class="plug"></span><span class="plug"></span><span class="plug"></span><span class="plug"></span><span class="plug"></span><span class="plug"></span><span class="plug"></span></div>8 · 7 · 6 · 5 · 4 · 3 · 2 · 1<small>Assignable mix out</small></div>
+            <div class="jg"><div class="jrow"><span class="rca" data-depth="3.5"></span><span class="rca" data-depth="3.5"></span></div>Out · In<small>SMPTE</small></div>
+            <div class="warn">⚠ Warning: to reduce the risk of fire or electric shock, do not expose this product to rain or moisture.</div>
+            <div class="plate"><span class="backmodel">Model number MPC2000XL</span><span>AC 120V · 60Hz · 23W</span></div>
+          </div>
         </div>
-        <div class="bp-foot"><span class="backmodel">Model number MPC2000XL</span><span>AC 120V · 60Hz · 23W</span></div>
       </div>
     </div>
     <div class="face left" aria-hidden="true"></div>
@@ -450,6 +499,16 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
             <button class="cap d" data-cur="down" aria-label="Decrease value">▼</button>
           </div>
         </div>
+        <div class="locate">
+          <div class="rule">Locate</div>
+          <div class="lrow">
+            <div class="ctl"><span class="lbl">◀ Step</span><button class="cap" data-loc="-1" aria-label="Step back"></button></div>
+            <div class="ctl"><span class="lbl">Step ▶</span><button class="cap" data-loc="1" aria-label="Step forward"></button></div>
+            <div class="ctl"><span class="lbl">Go to</span><button class="cap" data-loc="start" aria-label="Go to the start"></button></div>
+            <div class="ctl"><span class="lbl">◀◀ Bar</span><button class="cap" data-loc="-16" aria-label="Back one bar"></button></div>
+            <div class="ctl"><span class="lbl">Bar ▶▶</span><button class="cap" data-loc="16" aria-label="Forward one bar"></button></div>
+          </div>
+        </div>
         <div class="transport">
           <div class="ctl"><span class="lbl"><span class="led red" id="recLed"></span>Rec</span><button class="cap red" id="recBtn" aria-label="Record arm"></button></div>
           <div class="ctl"><span class="lbl"><span class="led red" id="odLed"></span>Over dub</span><button class="cap red" id="odBtn" aria-label="Overdub: record and play"></button></div>
@@ -473,8 +532,8 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
       </div>
       <div class="pright">
         <div class="knobs">
-          <div class="knobctl"><span class="lbl">Filter</span><div class="knob hot" id="cutKnob" data-depth="33.5" role="slider" tabindex="0" aria-label="Master filter" aria-valuemin="0" aria-valuemax="100"><div class="ind"></div></div><div class="minmax"><span>Low</span><span>Open</span></div></div>
-          <div class="knobctl"><span class="lbl">Main volume</span><div class="knob" id="volKnob" data-depth="33.5" role="slider" tabindex="0" aria-label="Main volume" aria-valuemin="0" aria-valuemax="100"><div class="ind"></div></div><div class="minmax"><span>Min</span><span>Max</span></div></div>
+          <div class="knobctl"><span class="lbl">Filter</span><div class="knobring"><div class="knob hot" id="cutKnob" data-depth="33.5" role="slider" tabindex="0" aria-label="Master filter" aria-valuemin="0" aria-valuemax="100"><div class="ind"></div></div></div><div class="minmax"><span>Low</span><span>Open</span></div></div>
+          <div class="knobctl"><span class="lbl">Main volume</span><div class="knobring"><div class="knob" id="volKnob" data-depth="33.5" role="slider" tabindex="0" aria-label="Main volume" aria-valuemin="0" aria-valuemax="100"><div class="ind"></div></div></div><div class="minmax"><span>Min</span><span>Max</span></div></div>
         </div>
         <div class="banks">
           <div class="rule">Sequence</div>
@@ -562,6 +621,7 @@ const DISPLAY_ORDER = [12,13,14,15, 8,9,10,11, 4,5,6,7, 0,1,2,3];
 const SEQ_NAMES = "ABCD";
 const STORE = "fantasy16-v1";
 const RATES = [{label:"1/8", every:2, sub:1}, {label:"1/16", every:1, sub:1}, {label:"1/32", every:1, sub:2}];
+const PAD_LETTERS = ["AB","CD","EF","GH","IJ","KL","MN","OP","QR","ST","UV","WX","YZ","&#","-!","()"];
 const LEVEL_BASE = 4; // in 16 Levels, pad 5 plays the sound at its original pitch
 
 // ---------- state ----------
@@ -920,7 +980,7 @@ function play(fromStart){
   emit("play");
 }
 function stop(){
-  if (!playing){ seqAbs = 0; showNow(0); flashMsg("LOCATE: START"); return; }
+  if (!playing){ seqAbs = 0; showNow(0); setPlayhead(-1); flashMsg("LOCATE: START"); return; }
   playing = false; queued = null; stepQ.length = 0; skip.clear();
   setPlayhead(-1); updateTransport(); updateSeqButtons();
   emit("stop");
@@ -994,10 +1054,10 @@ function buildPads(){
   DISPLAY_ORDER.forEach(i => {
     const p = PADS[i], cell = document.createElement("div");
     cell.className = "padcell";
-    cell.innerHTML = `<div class="padlbl"><span>Pad ${i + 1}</span><span>${p.key.toUpperCase()}</span></div>`;
+    cell.innerHTML = `<div class="padlbl"><span>Pad ${i + 1}</span><span>${PAD_LETTERS[i]}</span></div>`;
     const el = document.createElement("button");
     el.className = "pad"; el.setAttribute("aria-label", `Pad ${i + 1}`);
-    el.innerHTML = `<span class="smp"></span><span class="pname"></span>`;
+    el.innerHTML = `<span class="pk">${p.key}</span><span class="smp"></span><span class="pname"></span>`;
     const velAt = e => {
       if (S.fullLevel) return 1;
       const r = el.getBoundingClientRect();
@@ -1034,6 +1094,7 @@ function refreshPads(){
 // ---------- samples ----------
 async function decode(file){
   ensureAudio(); if (!ctx) throw new Error("no audio");
+  const led = $(".fled"); led.classList.add("on"); setTimeout(() => led.classList.remove("on"), 1200);
   const buf = await file.arrayBuffer();
   return await new Promise((res, rej) => { const p = ctx.decodeAudioData(buf, res, rej); if (p && p.then) p.then(res, rej); });
 }
@@ -1107,17 +1168,20 @@ function keypadPress(k){
   else if (entry.length < 3) entry = (entry === "0" ? "" : entry) + k;
   updateLcd();
 }
+const KEY_SUBS = {"1":"Song","2":"Misc","3":"Load","4":"Sample","5":"Trim","6":"Program","7":"Mixer","8":"Other","9":"MIDI/Sync","0":"Step","sign":"+ / −","enter":"Save"};
 function buildKeypad(){
   const pad = $("#keypad");
   ["7","8","9","4","5","6","1","2","3","sign","0","enter"].forEach(k => {
     const c = document.createElement("div"); c.className = "ctl";
-    const label = k === "sign" ? "+/−" : k === "enter" ? "Enter" : k;
+    const label = k === "sign" ? "Shift" : k === "enter" ? "Enter" : k;
     c.innerHTML = `<span class="lbl">${label}</span>`;
     const b = document.createElement("button");
     b.className = "cap" + (k === "sign" || k === "enter" ? "" : " blue");
     b.setAttribute("aria-label", k === "sign" ? "Plus or minus" : k === "enter" ? "Enter" : `Number ${k}`);
     b.addEventListener("click", () => keypadPress(k));
-    c.appendChild(b); pad.appendChild(c);
+    c.appendChild(b);
+    c.insertAdjacentHTML("beforeend", `<span class="sub">${KEY_SUBS[k] || "&nbsp;"}</span>`);
+    pad.appendChild(c);
   });
 }
 // data wheel: drag around it, scroll, or arrow keys
@@ -1245,6 +1309,13 @@ $("#odBtn").addEventListener("click", () => {
   recArmed = true; if (!playing) play(true); updateTransport(); flashMsg("OVERDUB"); emit("overdub");
 });
 $("#undoBtn").addEventListener("click", undo);
+document.querySelectorAll("[data-loc]").forEach(b => b.addEventListener("click", () => {
+  if (playing){ flashMsg("STOP TO LOCATE"); return; }
+  const len = patLen(), d = b.dataset.loc;
+  seqAbs = d === "start" ? 0 : ((seqAbs % len + +d) % len + len) % len;
+  showNow(seqAbs); setPlayhead(d === "start" ? -1 : seqAbs);
+  flashMsg("LOCATE " + $("#lcdNow").textContent);
+}));
 $("#mainBtn").addEventListener("click", () => { cur = 2; cancelEntry(); updateLcd(); flashMsg("MAIN SCREEN"); });
 $("#windowBtn").addEventListener("click", () => $("#seqpanel").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}));
 document.querySelectorAll("[data-cur]").forEach(b => b.addEventListener("click", () => {

@@ -7,13 +7,18 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow:wght@400;500;600;700&family=VT323&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,500;1,600&family=Michroma&family=Barlow:wght@400;500;600;700&family=VT323&display=swap">
 <style>
-/* Layout: a 2000XL-style top panel seen from above, sitting on a walnut desk. Left: LCD in its black bezel, F1–F6, keypad and data wheel, note variation and transport. Right: logo, teal control strip, teal pad field. The step editor sits below as a matching panel. Single deliberate look. */
+/* Layout: a 2000XL-style machine in 3D under a "Runaway" dusk: rose sky fading to plum, cream and gold accents. Left: LCD in its black bezel, F1–F6, keypad and data wheel, note variation and transport. Right: logo, teal control strip, teal pad field. The step editor sits below as a matching panel. Single deliberate look. */
 :root{
-  --room:#241a15;
-  --room-ink:#efe6da;
-  --room-muted:#b8a796;
+  --room:#2a1f2c;
+  --room-ink:#f6e6da;
+  --room-muted:#d5b9bf;
+  --sky-ink:#3b2233;
+  --sky-muted:#6d4558;
+  --gold:#c9a253;
+  --rose:#d9466f;
+  --f-serif:"Cormorant Garamond",Georgia,serif;
   --body:#dcd8cf;
   --body-hi:#ebe8e1;
   --body-lo:#c8c4ba;
@@ -53,18 +58,26 @@
   color-scheme:dark;
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{background-color:var(--room);color:var(--room-ink)}
 body{font-family:var(--f-body);font-size:15px;line-height:1.5;
-  background-image:radial-gradient(130% 70% at 50% 0%,rgba(255,200,150,.07),transparent 70%),repeating-linear-gradient(91deg,transparent 0 19px,rgba(0,0,0,.07) 19px 21px,transparent 21px 47px,rgba(255,220,180,.025) 47px 49px);
+  background-image:
+    radial-gradient(38% 16% at 9% 3%,rgba(92,42,64,.42),transparent 72%),
+    radial-gradient(30% 12% at 33% 0%,rgba(92,42,64,.28),transparent 70%),
+    radial-gradient(34% 14% at 76% 2%,rgba(92,42,64,.38),transparent 72%),
+    radial-gradient(26% 11% at 97% 10%,rgba(92,42,64,.3),transparent 70%),
+    linear-gradient(90deg,transparent calc(16% - 2px),rgba(43,24,40,.2) calc(16% - 2px) 16%,transparent 16% calc(84% - 2px),rgba(43,24,40,.2) calc(84% - 2px) 84%,transparent 84%),
+    linear-gradient(180deg,#f4bdab 0,#e8a3a0 240px,#c98597 560px,#8c5874 900px,#4a3047 1250px,var(--room) 1600px);
+  background-repeat:no-repeat;background-size:100% 1600px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
 .wrap{max-width:1160px;margin:0 auto;display:grid;gap:22px}
 button{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
+:focus-visible{outline:2px solid var(--rose);outline-offset:2px}
 
 .intro{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:10px 28px}
-.intro h1{margin:0;font-family:var(--f-logo);font-weight:400;font-size:clamp(24px,3.6vw,34px);letter-spacing:.04em;line-height:1.1;text-wrap:balance}
+.intro h1{margin:0;font-family:var(--f-serif);font-style:italic;font-weight:600;font-size:clamp(32px,4.4vw,48px);letter-spacing:.01em;line-height:1;color:var(--sky-ink);text-wrap:balance}
 .intro p{margin:0;color:var(--room-muted);max-width:64ch;min-width:0}
-kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid #6d5a4c;border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--room-ink);background:#33261f}
+kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid color-mix(in srgb,currentColor 35%,transparent);border-bottom-width:2px;border-radius:4px;padding:0 5px;color:inherit;background:color-mix(in srgb,currentColor 9%,transparent)}
 
 /* ---------- chassis ---------- */
 .unit{position:relative;border-radius:6px;padding:24px clamp(14px,2.4vw,30px) 30px;color:var(--ink);
@@ -73,7 +86,7 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid #6
   display:grid;gap:22px 36px;align-items:start;
   grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
   grid-template-areas:"rear rear" "lcd brand" "lcd panel" "clus pads" "low pads";
-  --th:46px;transform-style:preserve-3d;transform-origin:50% 45%;transform:rotateX(var(--rx,0deg)) rotateZ(var(--rz,0deg))}
+  transform-style:preserve-3d;transform-origin:50% 45%;transform:scale3d(var(--sc,1),var(--sc,1),var(--sc,1)) rotateX(var(--rx,0deg)) rotateZ(var(--rz,0deg))}
 
 .lbl{display:flex;align-items:center;justify-content:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink);white-space:nowrap;line-height:1.2}
 .ctl{display:grid;justify-items:center;gap:6px;align-content:end}
@@ -248,17 +261,63 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid #6
 .ruler.beat{color:var(--ink)}
 
 .notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px 28px;color:var(--room-muted);font-size:14px}
-.notes h3{margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--room-ink)}
+.notes h3{margin:0 0 4px;font-family:var(--f-serif);font-style:italic;font-weight:600;font-size:22px;line-height:1.15;color:#f9d6cc}
 .notes p{margin:0}
 .notes b{color:var(--room-ink);font-weight:600}
 
 /* ---------- 3D ---------- */
-.viewbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;color:var(--room-muted);font-size:13px;margin-bottom:-14px}
-.viewbar .vlabel{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--room-ink)}
-.viewbar button{border:1px solid #5a4a3e;background:#33261f;color:var(--room-ink);border-radius:999px;padding:4px 13px;font-size:13px;cursor:pointer}
-.viewbar button[aria-pressed="true"]{background:var(--room-ink);color:var(--room);border-color:var(--room-ink)}
-.stage{--persp:2600px;--side:min(60px,max(0px,calc((100vw - 100%) / 2 - 14px)));perspective:var(--persp);perspective-origin:50% 30%;
-  padding-block:40px 80px;margin-inline:calc(-1 * var(--side));padding-inline:var(--side);overflow-x:clip;cursor:grab;touch-action:pan-y}
+.viewbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px;color:var(--sky-muted);font-size:13px}
+.viewbar .vlabel{font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--sky-ink)}
+.viewbar button{border:0;border-bottom:2px solid transparent;border-radius:0;background:none;color:var(--sky-muted);padding:3px 1px;margin:0 5px;font-size:14px;font-weight:600;cursor:pointer}
+.viewbar button:hover{color:var(--sky-ink)}
+.viewbar button[aria-pressed="true"]{color:var(--sky-ink);border-bottom-color:var(--sky-ink)}
+.viewbar .vhint{flex-basis:100%;text-align:right;font-size:12.5px}
+@property --floor{syntax:"<length>";inherits:true;initial-value:4000px}
+@property --spk{syntax:"<length>";inherits:true;initial-value:0px}
+@property --spread{syntax:"<length>";inherits:true;initial-value:0px}
+.stage{--th:46px;--persp:2600px;--side:min(60px,max(0px,calc((100vw - 100%) / 2 - 14px)));perspective:var(--persp);perspective-origin:50% 320px;
+  position:relative;padding-block:30px 0;margin-inline:calc(-1 * var(--side));padding-inline:var(--side);overflow:clip;cursor:grab;touch-action:pan-y;border-radius:6px;
+  transition:--floor .7s cubic-bezier(.2,.7,.2,1),--spk .7s cubic-bezier(.2,.7,.2,1),--spread .7s cubic-bezier(.2,.7,.2,1);
+  background:
+    linear-gradient(180deg,transparent 0 var(--floor),#71403d var(--floor),#4c2b33 calc(var(--floor) + 70px),#2c1c27 calc(var(--floor) + 240px)),
+    radial-gradient(30% 22% at 12% 0%,rgba(120,52,78,.38),transparent 72%),
+    radial-gradient(26% 18% at 48% 0%,rgba(120,52,78,.28),transparent 72%),
+    radial-gradient(30% 24% at 88% 0%,rgba(120,52,78,.36),transparent 72%),
+    linear-gradient(180deg,rgba(238,150,150,.5),rgba(238,150,150,0) 40%,rgba(50,24,40,.3)),
+    repeating-linear-gradient(90deg,#e6cbb4 0,#f5e3d1 16px,#dbbba2 34px,#ecd5c0 50px);
+  box-shadow:0 30px 60px rgba(30,10,25,.4)}
+.stage::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;border-left:6px solid #1e1621;border-right:6px solid #1e1621;
+  background:linear-gradient(90deg,transparent calc(13% - 3px),#1e1621 calc(13% - 3px) 13%,transparent 13% calc(87% - 3px),#1e1621 calc(87% - 3px) 87%,transparent 87%);opacity:0;transition:opacity .5s}
+.stage.film::after{opacity:.9}
+.speaker{position:absolute;z-index:1;top:calc(var(--floor) - var(--spk) + 6px);height:var(--spk);width:calc(var(--spk) * .42);pointer-events:none;opacity:0;transition:opacity .5s}
+.stage.film .speaker{opacity:1}
+.speaker.l{left:calc(50% - var(--spread) - var(--spk) * .42)}
+.speaker.r{left:calc(50% + var(--spread))}
+.speaker i{position:absolute;display:block}
+.speaker .base{left:0;right:0;bottom:0;height:60%;background:linear-gradient(90deg,#141116,#40394a 45%,#19151c);clip-path:polygon(4% 100%,96% 100%,60% 0,40% 0)}
+.speaker .lens1{left:-8%;right:-8%;top:37%;height:6%;border-radius:50%;background:radial-gradient(circle at 50% 30%,#5b5363,#16131a 70%)}
+.speaker .neck{left:44%;right:44%;top:16%;height:22%;background:#1b181e}
+.speaker .lens2{left:2%;right:2%;top:13%;height:6%;border-radius:50%;background:radial-gradient(circle at 50% 30%,#5b5363,#16131a 70%)}
+.speaker .cap{left:30%;right:30%;top:0;height:15%;background:linear-gradient(90deg,#141116,#40394a,#19151c);clip-path:polygon(0 100%,100% 100%,62% 0,38% 0)}
+.tablerig{position:absolute;pointer-events:none;transform-style:preserve-3d;transform-origin:50% 45%;transform:scale3d(var(--sc,1),var(--sc,1),var(--sc,1)) rotateX(var(--rx,0deg)) rotateZ(var(--rz,0deg))}
+.tablerig div{transform-style:preserve-3d}
+.table{position:absolute;left:-24%;right:-24%;top:-16%;bottom:-16%;border-radius:10px;transform:translateZ(calc(-1 * var(--th) - 2px));pointer-events:none;
+  --leg:1000px;--apron:110px;
+  background:radial-gradient(60% 50% at 50% 50%,#c69a52,#a77a38 70%,#8a6229);box-shadow:inset 0 0 0 10px #d9b468,inset 0 0 0 13px #7a5622,inset 0 0 0 24px rgba(255,220,150,.2)}
+.apron{position:absolute;background:linear-gradient(180deg,#ecc978,#bf913f 38%,#8c6427)}
+.apron.front{left:0;right:0;top:100%;height:var(--apron);transform-origin:top;transform:rotateX(-90deg);
+  clip-path:polygon(0 0,100% 0,100% 64%,96% 76%,90% 66%,80% 84%,66% 70%,57% 90%,50% 100%,43% 90%,34% 70%,20% 84%,10% 66%,4% 76%,0 64%)}
+.apron.back{left:0;right:0;bottom:100%;height:var(--apron);transform-origin:bottom;transform:rotateX(90deg)}
+.apron.left{top:0;bottom:0;right:100%;width:var(--apron);transform-origin:right;transform:rotateY(-90deg);background:linear-gradient(90deg,#8c6427,#bf913f 62%,#ecc978)}
+.apron.right{top:0;bottom:0;left:100%;width:var(--apron);transform-origin:left;transform:rotateY(90deg);background:linear-gradient(90deg,#ecc978,#bf913f 38%,#8c6427)}
+.cartouche{position:absolute;left:50%;top:12%;width:120px;height:56%;margin-left:-60px;border-radius:50%;background:radial-gradient(circle at 50% 40%,#fff1c4,#d8ae5a 45%,#8f6628 75%);box-shadow:0 0 0 4px #9a6f2c}
+.leg{position:absolute;width:84px;height:var(--leg);transform-origin:top;transform:rotateX(-90deg)}
+.leg.front{top:100%}.leg.back{top:0}
+.leg.fl,.leg.bl{left:3%}.leg.fr,.leg.br{right:3%}
+.leg,.leg i{background:linear-gradient(90deg,#6e4c1b,#e9c777 38%,#b98a39 66%,#5f4116);
+  clip-path:polygon(0 0,100% 0,96% 5%,78% 14%,64% 28%,58% 48%,60% 70%,66% 86%,84% 95%,86% 100%,22% 100%,30% 93%,40% 82%,42% 62%,38% 42%,26% 24%,8% 9%)}
+.leg i{position:absolute;inset:0;display:block;transform:rotateY(90deg)}
+
 .stage.dragging{cursor:grabbing}
 .unit div:not(.lcd):not(.lcd *){transform-style:preserve-3d}
 .cap{transform:translateZ(4px)}
@@ -271,7 +330,7 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid #6
 .face.back{left:0;right:0;bottom:100%;height:var(--th);transform-origin:bottom;transform:rotateX(90deg);background:#86827a}
 .face.left{top:0;bottom:0;right:100%;width:var(--th);transform-origin:right;transform:rotateY(-90deg);background:linear-gradient(90deg,#9d998f,#bab6ac)}
 .face.right{top:0;bottom:0;left:100%;width:var(--th);transform-origin:left;transform:rotateY(90deg);background:linear-gradient(90deg,#bab6ac,#9d998f)}
-.face.bottom{inset:0;transform:translateZ(calc(-1 * var(--th)));background:#4d4a44;box-shadow:0 0 70px 26px rgba(0,0,0,.6)}
+.face.bottom{inset:0;transform:translateZ(calc(-1 * var(--th)));background:#4d4a44;box-shadow:0 0 80px 30px rgba(43,18,38,.55)}
 .floppy{position:absolute;right:6%;top:26%;width:min(26%,260px);height:40%;border-radius:3px;background:linear-gradient(180deg,#2a2b2e,#131416);box-shadow:inset 0 2px 3px rgba(0,0,0,.8),0 1px 0 rgba(255,255,255,.4)}
 .floppy::before{content:"";position:absolute;left:7%;right:24%;top:42%;height:3px;background:#030303;border-radius:2px}
 .floppy::after{content:"";position:absolute;right:6%;top:28%;width:12%;height:44%;background:#d2cec5;border-radius:2px}
@@ -286,40 +345,44 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid #6
 .rear .model{font-family:var(--f-logo);font-size:10px;letter-spacing:.22em;color:#c3c7cb;white-space:nowrap}
 
 /* ---------- lessons ---------- */
-.viewbar .teach{margin-left:auto;background:var(--orange);border-color:var(--orange);color:#2a1406;font-weight:700}
+.viewbar .teach{margin-left:18px;padding-left:18px;border-left:1px solid rgba(59,34,51,.3);font-family:var(--f-serif);font-style:italic;font-size:21px;font-weight:600;color:var(--sky-ink);line-height:1}
+.viewbar .teach::after{content:" →"}
 .coach{position:fixed;z-index:60;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(370px,calc(100vw - 32px));max-height:min(70vh,520px);overflow:auto;
-  background:#1c1410;color:var(--room-ink);border:1px solid #4a3a2f;border-radius:12px;padding:14px 16px 12px;box-shadow:0 18px 50px rgba(0,0,0,.6);display:grid;gap:10px}
+  background:#f7ebe1;color:var(--sky-ink);border:1px solid rgba(59,34,51,.18);border-radius:12px;padding:14px 16px 12px;box-shadow:0 20px 50px rgba(43,18,38,.45);display:grid;gap:10px}
 .coach.flip{right:auto;left:max(16px,env(safe-area-inset-left,0px))}
 .coach.min .cc-body,.coach.min .cc-foot{display:none}
 .cc-head{display:flex;align-items:center;gap:6px}
-.cc-kicker{flex:1;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--orange)}
-.cc-icon{border:0;background:#33261f;color:var(--room-ink);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;line-height:1}
+.cc-kicker{flex:1;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:#9b7432}
+.cc-icon{border:0;background:rgba(59,34,51,.08);color:var(--sky-ink);width:28px;height:28px;border-radius:6px;cursor:pointer;font-size:16px;line-height:1}
 .cc-body{display:grid;gap:10px;font-size:14.5px}
 .cc-body p{margin:0}
-.cc-intro{color:var(--room-muted)}
-.cc-step b{color:#fff}
-.cc-count{font-family:var(--f-lcd);font-size:20px;color:var(--led)}
-.cc-nice{font-weight:700;color:var(--led)}
+.cc-intro{color:var(--sky-muted)}
+.cc-step b{color:#2a1424}
+.cc-count{font-family:var(--f-lcd);font-size:20px;color:var(--rose)}
+.cc-nice{font-weight:700;color:#2f7d5b}
 .cc-list{list-style:none;margin:0;padding:0;display:grid;gap:6px}
-.cc-list button{width:100%;display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid #3e3027;background:#271c16;color:inherit;border-radius:8px;padding:9px 11px;cursor:pointer}
-.cc-list button:hover{border-color:var(--orange)}
-.cc-list .n{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#3a2c23;font-weight:700;font-size:13px}
-.cc-list .n.ok{background:var(--led);color:#1c1410}
+.cc-list button{width:100%;display:flex;gap:12px;align-items:flex-start;text-align:left;border:1px solid rgba(59,34,51,.14);background:#fffaf5;color:inherit;border-radius:8px;padding:9px 11px;cursor:pointer}
+.cc-list button:hover{border-color:var(--gold)}
+.cc-list .n{flex:none;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#ead7cb;font-weight:700;font-size:13px}
+.cc-list .n.ok{background:var(--gold);color:#2b1a12}
 .cc-list b{display:block;font-size:14.5px}
-.cc-list small{display:block;color:var(--room-muted);font-size:13px}
-.cc-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--room-muted)}
-.cc-foot button,.cc-actions button{border:1px solid #4a3a2f;background:#2b201a;color:var(--room-ink);border-radius:999px;padding:5px 13px;cursor:pointer;font-size:13px}
+.cc-list small{display:block;color:var(--sky-muted);font-size:13px}
+.cc-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--sky-muted)}
+.cc-foot button,.cc-actions button{border:0;border-bottom:1px solid currentColor;background:none;color:var(--sky-ink);border-radius:0;padding:2px 0;cursor:pointer;font-size:13.5px;font-weight:600}
 .cc-foot button:disabled{opacity:.35;cursor:default}
-.cc-actions{display:flex;flex-wrap:wrap;gap:8px}
-.cc-actions .cc-primary{background:var(--orange);border-color:var(--orange);color:#2a1406;font-weight:700}
-.cc-body kbd{background:#33261f}
-.coach-target{animation:coachpulse 1.1s ease-in-out infinite;outline:3px solid var(--orange);outline-offset:4px}
-@keyframes coachpulse{50%{outline-color:rgba(236,122,44,.15)}}
+.cc-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.cc-actions .cc-primary{border:0;background:var(--sky-ink);color:#fbeee6;font-weight:700;border-radius:3px;padding:7px 14px}
+.cc-body kbd{background:#fff}
+.coach-target{animation:coachpulse 1.1s ease-in-out infinite;outline:3px solid var(--rose);outline-offset:4px}
+@keyframes coachpulse{50%{outline-color:rgba(217,70,111,.15)}}
 @media (prefers-reduced-motion:reduce){.coach-target{animation:none}}
 
 @media (max-width:900px){
   .unit{grid-template-columns:minmax(0,1fr);grid-template-areas:"rear" "brand" "lcd" "panel" "pads" "low" "clus"}
   .stage{--persp:4200px}
+  .speaker{display:none}
+  .stage.film::after{background:none}
+  .viewbar .teach{margin-left:5px;padding-left:0;border-left:0}
   .brand{justify-items:start}
 }
 @media (max-width:480px){
@@ -344,19 +407,32 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid #6
 <main class="wrap">
   <header class="intro">
     <h1>MPC 2000XL</h1>
-    <p>Tap the pads or use the keys <kbd>1–4</kbd> <kbd>Q–R</kbd> <kbd>A–F</kbd> <kbd>Z–V</kbd>. <kbd>Space</kbd> plays from the top and stops, <kbd>Enter</kbd> arms record, <kbd>T</kbd> taps tempo, <kbd>N</kbd> latches note repeat. Click any value on the screen, then turn the data wheel or use the arrow keys. Pick a view or drag around the machine to see it from another angle. New to this? Open <b>Lessons</b>.</p>
+    <div class="viewbar" role="group" aria-label="View and lessons">
+      <span class="vlabel">View</span>
+      <button data-view="film" aria-pressed="true">Film</button>
+      <button data-view="close">Close-up</button>
+      <button data-view="low">Low angle</button>
+      <button data-view="top">Top down</button>
+      <button class="teach" id="teachBtn">Lessons</button>
+      <span class="vhint">Drag empty space around the machine to turn it.</span>
+    </div>
   </header>
 
-  <div class="viewbar" role="group" aria-label="Camera">
-    <span class="vlabel">View</span>
-    <button data-view="studio" aria-pressed="true">Studio</button>
-    <button data-view="low">Low angle</button>
-    <button data-view="top">Top down</button>
-    <span>Drag empty space on or around the machine to turn it.</span>
-    <button class="teach" id="teachBtn">Lessons</button>
-  </div>
-
-  <div class="stage" id="stage">
+  <div class="stage film" id="stage">
+    <div class="speaker l" aria-hidden="true"><i class="cap"></i><i class="lens2"></i><i class="neck"></i><i class="base"></i><i class="lens1"></i></div>
+    <div class="speaker r" aria-hidden="true"><i class="cap"></i><i class="lens2"></i><i class="neck"></i><i class="base"></i><i class="lens1"></i></div>
+    <div class="tablerig" aria-hidden="true">
+      <div class="table">
+        <div class="apron front"><span class="cartouche"></span></div>
+        <div class="apron back"></div>
+        <div class="apron left"></div>
+        <div class="apron right"></div>
+        <div class="leg front fl"><i></i></div>
+        <div class="leg front fr"><i></i></div>
+        <div class="leg back bl"><i></i></div>
+        <div class="leg back br"><i></i></div>
+      </div>
+    </div>
   <section class="unit" aria-label="MPC 2000XL">
     <div class="face front" aria-hidden="true"><span class="fronttxt">MPC2000XL</span><span class="floppy"></span></div>
     <div class="face back" aria-hidden="true"></div>
@@ -498,6 +574,7 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid #6
     <div><h3>Record a loop</h3><p>Press <b>Over dub</b> to start recording right away, or arm <b>Rec</b> and press <b>Play start</b>. Hits snap to the nearest sixteenth and loop back each pass. <b>Undo seq</b> takes back the last pass.</p></div>
     <div><h3>Edit on the screen</h3><p>Click a value on the LCD or move to it with the <b>cursor</b> keys. Turn the <b>data wheel</b>, press ▲ ▼, or type a number on the keypad and press <b>Enter</b>.</p></div>
     <div><h3>16 Levels</h3><p>Select a pad and turn on <b>16 Levels</b>. All sixteen pads now play that sound in semitones, with pad 5 at its original pitch. Chop a soul record with <b>F6</b>, then play a slice up high for the sped-up vocal sound.</p></div>
+    <div><h3>Keyboard</h3><p>Pads are <kbd>1–4</kbd> <kbd>Q–R</kbd> <kbd>A–F</kbd> <kbd>Z–V</kbd>, top row to bottom. <kbd>Space</kbd> plays from the top and stops, <kbd>Enter</kbd> arms record, <kbd>T</kbd> taps tempo, <kbd>N</kbd> latches note repeat, arrow keys move around the screen.</p></div>
     <div><h3>Repeat, erase, mute</h3><p>Hold <b>Tap tempo</b> while playing pads to roll them. Hold <b>Erase</b> and tap a pad to wipe its hits. Turn on <b>Track mute</b> and tap pads to drop parts in and out.</p></div>
   </section>
   <aside class="coach" id="coach" aria-label="Lessons" hidden>
@@ -1470,7 +1547,7 @@ coach = (() => {
       `<li><button data-l="${n}"><span class="n${doneList.includes(n) ? " ok" : ""}">${doneList.includes(n) ? "✓" : n + 1}</span><span><b>${l.title}</b><small>${l.blurb}</small></span></button></li>`).join("")}</ol>`;
     bindLessonButtons();
   }
-  function start(n){ L = n; k = 0; show(); }
+  function start(n){ L = n; k = 0; if (view === "film") setView("close"); show(); }
   function show(){
     const les = LESSONS[L], step = les.steps[k], last = k === les.steps.length - 1;
     count = 0; busy = false; clear();
@@ -1536,28 +1613,76 @@ function extrude(){
   });
 }
 const unit = $(".unit"), stage = $("#stage");
-const VIEWS = {studio:[30, -6], low:[50, 0], top:[0, 0]};
+const VIEWS = {film:{x:36, z:0, fill:.34}, close:{x:26, z:-4, fill:1}, low:{x:50, z:0, fill:1}, top:{x:0, z:0, fill:1}};
+const NARROW_X = {film:18, close:14, low:24, top:0};
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)"), narrowMq = matchMedia("(max-width:900px)");
-let rx = 0, rz = 0, view = "studio";
-function applyView(x, z, animate){
-  rx = clamp(x, 0, 60); rz = clamp(z, -35, 35);
-  unit.style.transition = animate && !reduceMotion.matches ? "transform .7s cubic-bezier(.2,.7,.2,1), margin .7s cubic-bezier(.2,.7,.2,1)" : "none";
-  unit.style.setProperty("--rx", rx + "deg"); unit.style.setProperty("--rz", rz + "deg");
-  const h = unit.offsetHeight, c = 1 - Math.cos(rx * Math.PI / 180);
-  unit.style.marginTop = (-h * .5 * c).toFixed(1) + "px";
-  unit.style.marginBottom = (-h * .42 * c).toFixed(1) + "px";
+const EASE = "cubic-bezier(.2,.7,.2,1)";
+let rx = 0, rz = 0, view = "film";
+const rig = $(".tablerig");
+function pose(x, z, s, mt, mb){
+  stage.style.setProperty("--rx", x + "deg"); stage.style.setProperty("--rz", z + "deg"); stage.style.setProperty("--sc", s.toFixed(3));
+  unit.style.marginTop = mt.toFixed(1) + "px"; unit.style.marginBottom = mb.toFixed(1) + "px";
+  // the table lives in its own 3D layer under the machine, matched to the machine's box
+  rig.style.top = unit.offsetTop + "px"; rig.style.left = unit.offsetLeft + "px";
+  rig.style.width = unit.offsetWidth + "px"; rig.style.height = unit.offsetHeight + "px";
 }
-addEventListener("resize", () => applyView(rx, rz, false));
+// Try the pose, measure where it lands, and fit it to the window. This runs in one task, so nothing paints in between.
+function solve(x, z, fill){
+  const film = stage.classList.contains("film");
+  pose(x, z, 1, 0, 0);
+  const avail = Math.max(320, innerHeight - 110);
+  const s = narrowMq.matches ? 1 : clamp(avail * fill / unit.getBoundingClientRect().height, .25, 1);
+  let mt = 0, mb = 0, m = null;
+  const measure = () => {
+    const sr = stage.getBoundingClientRect(), top0 = sr.top + parseFloat(getComputedStyle(stage).paddingTop) + mt;
+    const r = unit.getBoundingClientRect();
+    const legBottom = Math.max(...[...rig.querySelectorAll(".leg.front")].map(l => l.getBoundingClientRect().bottom));
+    return {sr, r, top0, legBottom, bottom:film ? Math.max(r.bottom, legBottom) : r.bottom};
+  };
+  for (let n = 0; n < 3; n++){
+    pose(x, z, s, mt, mb);
+    m = measure();
+    const h = unit.offsetHeight, dTop = m.r.top - m.top0, dBot = m.bottom - m.top0;
+    mt = -dTop; mb = dBot + 28 - h;
+  }
+  pose(x, z, s, mt, mb);
+  m = measure();
+  const tableW = rig.querySelector(".table").getBoundingClientRect().width;
+  const floor = m.legBottom - m.sr.top, spk = Math.max(0, (floor - (m.r.top - m.sr.top)) * .95);
+  return {s, mt, mb, floor, spk, spread:Math.min(tableW / 2 + spk * .12, m.sr.width / 2 - spk * .5)};
+}
+function go(x, z, animate){
+  x = clamp(x, 0, 60); z = clamp(z, -35, 35);
+  const keep = [stage.style.getPropertyValue("--rx"), stage.style.getPropertyValue("--rz"), stage.style.getPropertyValue("--sc"), unit.style.marginTop, unit.style.marginBottom, rig.style.top];
+  unit.style.transition = rig.style.transition = "none";
+  const t = solve(x, z, VIEWS[view].fill);
+  rx = x; rz = z;
+  const anim = animate && !reduceMotion.matches;
+  if (anim){
+    stage.style.setProperty("--rx", keep[0]); stage.style.setProperty("--rz", keep[1]); stage.style.setProperty("--sc", keep[2]);
+    unit.style.marginTop = keep[3]; unit.style.marginBottom = keep[4]; rig.style.top = keep[5];
+    void unit.offsetWidth;
+    unit.style.transition = `transform .7s ${EASE}, margin .7s ${EASE}`;
+    rig.style.transition = `transform .7s ${EASE}, top .7s ${EASE}`;
+    pose(x, z, t.s, t.mt, t.mb);
+  }
+  stage.style.transition = anim ? "" : "none";
+  stage.style.setProperty("--floor", t.floor.toFixed(1) + "px");
+  stage.style.setProperty("--spk", t.spk.toFixed(1) + "px");
+  stage.style.setProperty("--spread", t.spread.toFixed(1) + "px");
+}
 function setView(name, animate = true){
   view = name;
-  let [x, z] = VIEWS[name];
-  if (narrowMq.matches && name !== "top"){ x = name === "low" ? 24 : 14; z = 0; }
-  applyView(x, z, animate);
+  stage.classList.toggle("film", name === "film");
+  go(narrowMq.matches ? NARROW_X[name] : VIEWS[name].x, narrowMq.matches ? 0 : VIEWS[name].z, animate);
   emit("view", {name});
   document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === name));
 }
 document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
 narrowMq.addEventListener("change", () => setView(view, false));
+let resizeT = 0;
+addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => go(rx, rz, false), 120); });
+if (document.fonts) document.fonts.ready.then(() => go(rx, rz, false));
 (() => {
   let sx = 0, sy = 0, x0 = 0, z0 = 0, id = null;
   stage.addEventListener("pointerdown", e => {
@@ -1570,7 +1695,7 @@ narrowMq.addEventListener("change", () => setView(view, false));
   stage.addEventListener("pointermove", e => {
     if (e.pointerId !== id) return;
     const dy = e.pointerType === "touch" ? 0 : sy - e.clientY; // on touch, vertical drags keep scrolling the page
-    applyView(x0 + dy * .2, z0 + (e.clientX - sx) * .12, false);
+    go(x0 + dy * .2, z0 + (e.clientX - sx) * .12, false);
   });
   const end = e => { if (e.pointerId !== id) return; id = null; stage.classList.remove("dragging"); if (Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 20) emit("view", {name:"drag"}); };
   stage.addEventListener("pointerup", end); stage.addEventListener("pointercancel", end);
@@ -1585,7 +1710,7 @@ updateLcd();
 updateTransport();
 paintVar();
 extrude();
-setView("studio", false);
+setView("film", false);
 })();
 </script>
 

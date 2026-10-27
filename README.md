@@ -1,6 +1,6 @@
 # MPC 2000XL
 
-A 3D browser recreation of the Akai MPC 2000XL. Drag around it to turn it, or use the Studio / Low angle / Top down views. It has a synthesized kit (808 kick and boom, snare, clap, hats, keys,
+A 3D browser recreation of the Akai MPC 2000XL. It sits on a gilded table in a dusk-lit room, like the "Runaway" film. Use the Film, Close-up, Low angle and Top down views, or drag around it to turn it. It has a synthesized kit (808 kick and boom, snare, clap, hats, keys,
 choir, brass, orchestra hit and more), live loop recording quantized to 16th notes,
 note repeat, swing, four sequences, a step editor, and sample loading and chopping.
 

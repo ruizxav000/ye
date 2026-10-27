@@ -7,286 +7,403 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=VT323&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=Barlow:wght@400;500;600;700&family=VT323&display=swap">
 <style>
-/* Layout: one piece of hardware. LCD, transport and faders on the left; the 4x4 pads on the right; the step grid sits below like a second screen. Single dark look on purpose: it is a machine. */
+/* Layout: a 2000XL-style top panel seen from above, sitting on a walnut desk. Left: LCD in its black bezel, F1–F6, keypad and data wheel, note variation and transport. Right: logo, teal control strip, teal pad field. The step editor sits below as a matching panel. Single deliberate look. */
 :root{
-  --room:#111114;
-  --chassis:#2a2b31;
-  --chassis-hi:#34353c;
-  --chassis-lo:#1b1c20;
-  --well:#141518;
-  --ink:#dcd8ce;
-  --muted:#8e8c86;
-  --gold:#c9a45c;
-  --pad:#3b3c43;
-  --pad-edge:#141417;
-  --lcd:#b4cd84;
-  --lcd-ink:#1d2912;
-  --lcd-dim:#8ea763;
-  --g-drum:#ff4a3a;
-  --g-hat:#ffb03b;
-  --g-keys:#55ccff;
-  --g-voice:#c58cff;
-  --rec:#ff3030;
-  --play:#45f08e;
-  --f-display:"Barlow Condensed","Arial Narrow",sans-serif;
+  --room:#241a15;
+  --room-ink:#efe6da;
+  --room-muted:#b8a796;
+  --body:#dcd8cf;
+  --body-hi:#ebe8e1;
+  --body-lo:#c8c4ba;
+  --edge:#a7a399;
+  --ink:#3a3b3f;
+  --ink-soft:#6c6d71;
+  --teal:#78a9a7;
+  --teal-hi:#86b6b4;
+  --teal-dk:#5b8b89;
+  --teal-ink:#22403e;
+  --pad:#7f8f8e;
+  --pad-hi:#93a2a1;
+  --pad-lo:#6b7a79;
+  --cap:#f1eee8;
+  --cap-lo:#d5d1c9;
+  --cap-edge:#9f9b92;
+  --key-blue:#5d98a9;
+  --red:#c9432f;
+  --orange:#ec7a2c;
+  --lcd:#a7b4b8;
+  --lcd-hi:#bdc9cb;
+  --lcd-ink:#1c2630;
+  --lcd-dim:#61707a;
+  --bezel:#131517;
+  --led-off:#6b5a4e;
+  --led:#d8ff4f;
+  --led-red:#ff3b2b;
+  --stripe-red:#d23a2c;
+  --stripe-blue:#2b4a8d;
+  --g-drum:#e5452f;
+  --g-hat:#e7991b;
+  --g-keys:#2f8fcf;
+  --g-voice:#8d5bd8;
+  --f-logo:"Michroma","Arial Black",sans-serif;
   --f-body:"Barlow",system-ui,sans-serif;
   --f-lcd:"VT323",ui-monospace,"Courier New",monospace;
   color-scheme:dark;
 }
 *{box-sizing:border-box}
-html,body{background:var(--room);color:var(--ink)}
+html,body{background-color:var(--room);color:var(--room-ink)}
 body{font-family:var(--f-body);font-size:15px;line-height:1.5;
+  background-image:radial-gradient(130% 70% at 50% 0%,rgba(255,200,150,.07),transparent 70%),repeating-linear-gradient(91deg,transparent 0 19px,rgba(0,0,0,.07) 19px 21px,transparent 21px 47px,rgba(255,220,180,.025) 47px 49px);
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
-.wrap{max-width:1120px;margin:0 auto;display:grid;gap:22px}
+.wrap{max-width:1160px;margin:0 auto;display:grid;gap:22px}
 button{font:inherit;color:inherit}
-:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+:focus-visible{outline:2px solid var(--orange);outline-offset:2px}
 
 .intro{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:10px 28px}
-.intro h1{margin:0;font-family:var(--f-display);font-weight:700;font-size:clamp(30px,5vw,44px);letter-spacing:.04em;text-transform:uppercase;line-height:1;text-wrap:balance}
-.intro h1 span{color:var(--gold)}
-.intro p{margin:0;color:var(--muted);max-width:62ch;min-width:0}
-kbd{font-family:var(--f-display);font-weight:600;font-size:.85em;border:1px solid #45464e;border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--ink);background:var(--chassis-lo)}
+.intro h1{margin:0;font-family:var(--f-logo);font-weight:400;font-size:clamp(24px,3.6vw,34px);letter-spacing:.04em;line-height:1.1;text-wrap:balance}
+.intro p{margin:0;color:var(--room-muted);max-width:64ch;min-width:0}
+kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid #6d5a4c;border-bottom-width:2px;border-radius:4px;padding:0 5px;color:var(--room-ink);background:#33261f}
 
 /* ---------- chassis ---------- */
-.unit{position:relative;border-radius:16px;padding:22px clamp(14px,2.4vw,28px) 26px;
-  background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    linear-gradient(180deg,var(--chassis-hi),var(--chassis) 30%,var(--chassis-lo));
-  box-shadow:0 1px 0 rgba(255,255,255,.07) inset,0 -2px 0 rgba(0,0,0,.4) inset,0 30px 60px -20px rgba(0,0,0,.8),0 2px 0 #0a0a0c;
-  display:grid;gap:20px 30px;
-  grid-template-columns:minmax(0,.92fr) minmax(0,1.1fr);
-  grid-template-areas:"brand brand" "lcd pads" "ctrl pads" "fad pads"}
-.screw{position:absolute;width:11px;height:11px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#6a6b72,#2c2d32 70%);box-shadow:0 1px 0 rgba(255,255,255,.08)}
-.screw::after{content:"";position:absolute;left:2px;right:2px;top:5px;height:1px;background:#18181b;transform:rotate(35deg)}
-.screw.tl{top:9px;left:9px}.screw.tr{top:9px;right:9px}.screw.bl{bottom:9px;left:9px}.screw.br{bottom:9px;right:9px}
+.unit{position:relative;border-radius:14px;padding:24px clamp(14px,2.4vw,30px) 30px;color:var(--ink);
+  background:linear-gradient(180deg,var(--body-hi),var(--body) 35%,var(--body-lo));
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.65),inset 0 -3px 0 rgba(0,0,0,.1),0 2px 0 var(--edge),0 7px 0 #8d897f,0 34px 60px -16px rgba(0,0,0,.8);
+  display:grid;gap:22px 36px;align-items:start;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);
+  grid-template-areas:"lcd brand" "lcd panel" "clus pads" "low pads"}
 
-.brand{grid-area:brand;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:6px 20px;border-bottom:1px solid rgba(201,164,92,.25);padding:0 6px 12px}
-.brand .name{font-family:var(--f-display);font-weight:700;font-size:26px;letter-spacing:.18em;color:var(--gold);text-transform:uppercase}
-.brand .name small{font-weight:500;font-size:13px;letter-spacing:.2em;color:var(--muted);margin-left:10px}
-.brand .power{display:flex;align-items:center;gap:8px;font-family:var(--f-display);font-size:12px;letter-spacing:.2em;color:var(--muted);text-transform:uppercase}
-.led{width:8px;height:8px;border-radius:50%;background:#3a2020;box-shadow:inset 0 1px 1px rgba(0,0,0,.6);flex:none}
-.led.on{background:var(--rec);box-shadow:0 0 8px var(--rec)}
-.led.green.on{background:var(--play);box-shadow:0 0 8px var(--play)}
-.led.amber.on{background:var(--g-hat);box-shadow:0 0 8px var(--g-hat)}
+.lbl{display:flex;align-items:center;justify-content:center;gap:5px;font-size:10px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink);white-space:nowrap;line-height:1.2}
+.ctl{display:grid;justify-items:center;gap:6px;align-content:end}
+.led{width:7px;height:7px;border-radius:50%;background:var(--led-off);box-shadow:inset 0 1px 1px rgba(0,0,0,.5);flex:none}
+.led.on{background:var(--led);box-shadow:0 0 7px var(--led)}
+.led.red.on{background:var(--led-red);box-shadow:0 0 7px var(--led-red)}
+.led.blink{animation:ledblink .5s steps(2) infinite}
+@keyframes ledblink{50%{background:var(--led-off);box-shadow:none}}
 
-.silk{font-family:var(--f-display);font-weight:600;font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.cap{appearance:none;display:inline-grid;place-items:center;border:1px solid var(--cap-edge);border-radius:4px;min-height:32px;min-width:52px;padding:0 10px;cursor:pointer;
+  background:linear-gradient(180deg,#fbfaf6,var(--cap) 40%,var(--cap-lo));
+  box-shadow:inset 0 1px 0 #fff,0 3px 0 #a09c93,0 5px 6px rgba(0,0,0,.16);
+  color:var(--ink);font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  touch-action:manipulation;user-select:none;-webkit-user-select:none;transition:transform .04s,box-shadow .04s}
+.cap:active,.cap.pressed{transform:translateY(2px);box-shadow:inset 0 1px 0 #fff,0 1px 0 #a09c93,0 2px 3px rgba(0,0,0,.16)}
+.cap.red{background:linear-gradient(180deg,#e2634e,var(--red) 45%,#a83525);border-color:#86291c;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 3px 0 #7a2519,0 5px 6px rgba(0,0,0,.2)}
+.cap.red:active,.cap.red.pressed{box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 1px 0 #7a2519}
+.cap.orange{background:linear-gradient(180deg,#ff9f5e,var(--orange) 45%,#c65c17);border-color:#a24c12;box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 3px 0 #9c4811,0 5px 6px rgba(0,0,0,.2)}
+.cap.orange:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.4),0 1px 0 #9c4811}
+.cap.blue{background:linear-gradient(180deg,#86bccb 0 45%,var(--key-blue) 46%,#4b8191);border-color:#3c6c7a;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 3px 0 #3b6a78,0 5px 6px rgba(0,0,0,.18)}
+.cap.blue:active{box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 1px 0 #3b6a78}
+
+/* ---------- logo ---------- */
+.brand{grid-area:brand;display:grid;justify-items:end;gap:5px;padding-top:4px;min-width:0}
+.logo{font-family:var(--f-logo);font-size:clamp(26px,3.7vw,46px);line-height:1;letter-spacing:.03em;white-space:nowrap}
+.logo .o{color:transparent;-webkit-text-stroke:1.3px var(--ink-soft)}
+.logo .s{color:var(--ink);margin-left:.08em}
+.stripe{width:min(100%,25em);height:5px;background:linear-gradient(var(--stripe-red),var(--stripe-red)) right top/62% 3px no-repeat,linear-gradient(var(--stripe-blue),var(--stripe-blue)) left bottom/100% 2px no-repeat}
+.sub{font-family:var(--f-logo);font-size:clamp(9px,1.15vw,13px);letter-spacing:.16em;color:var(--ink);text-transform:uppercase;white-space:nowrap}
 
 /* ---------- LCD ---------- */
-.lcdbox{grid-area:lcd;background:var(--well);border-radius:8px;padding:9px;box-shadow:inset 0 2px 6px rgba(0,0,0,.7)}
-.lcd{position:relative;background:linear-gradient(180deg,#c3da94,var(--lcd) 40%,#a6c076);color:var(--lcd-ink);border-radius:3px;padding:8px 12px 9px;font-family:var(--f-lcd);font-size:22px;line-height:1.05;text-transform:uppercase;overflow:hidden;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.25),inset 0 0 24px rgba(60,80,20,.25)}
-.lcd::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(29,41,18,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(29,41,18,.06) 1px,transparent 1px);background-size:3px 3px}
-.lcd .row{display:flex;justify-content:space-between;gap:10px;white-space:nowrap}
-.lcd .row span{overflow:hidden;text-overflow:ellipsis}
-.lcd .inv{background:var(--lcd-ink);color:var(--lcd);padding:0 5px}
-.lcd canvas{display:block;width:100%;height:58px;margin:5px 0 4px;border-top:1px dashed rgba(29,41,18,.35);border-bottom:1px dashed rgba(29,41,18,.35)}
-.lcd .dim{color:var(--lcd-dim)}
-.steps{display:grid;grid-template-columns:repeat(16,1fr);gap:4px;margin-top:9px;padding:0 2px}
-.steps i{height:5px;border-radius:2px;background:#2a2b30}
-.steps i.beat{background:#3a3b42}
-.steps i.on{background:var(--g-hat);box-shadow:0 0 6px var(--g-hat)}
-.steps i.on.rec{background:var(--rec);box-shadow:0 0 6px var(--rec)}
+.lcdzone{grid-area:lcd;display:grid;grid-template-columns:minmax(0,1fr);gap:14px;min-width:0}
+.bezel{background:linear-gradient(180deg,#2a2d31,var(--bezel) 30%);border-radius:10px 10px 6px 6px;padding:10px clamp(10px,2.2vw,24px) clamp(14px,2.2vw,20px);box-shadow:inset 0 2px 0 rgba(255,255,255,.1),0 4px 0 rgba(0,0,0,.25),0 8px 14px rgba(0,0,0,.25)}
+.bezel .tag{font-size:8.5px;font-weight:600;letter-spacing:.22em;color:#7f878d;text-transform:uppercase;text-align:center;margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lcd{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--lcd-hi),var(--lcd) 55%,#9ba9ad);color:var(--lcd-ink);border-radius:2px;
+  font-family:var(--f-lcd);font-size:clamp(16px,1.7vw,20px);line-height:1.18;padding:6px 9px 6px;
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.35),inset 0 0 26px rgba(20,40,60,.22)}
+.lcd::after{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(28,38,48,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(28,38,48,.05) 1px,transparent 1px);background-size:3px 3px}
+.lcd .row{display:flex;justify-content:space-between;gap:8px;white-space:nowrap;min-width:0}
+.lcd .row>span{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.lcd .row>span:last-child:not(:first-child){flex:none}
+.fld{font:inherit;color:inherit;background:none;border:0;padding:0 2px;margin:0;cursor:pointer;line-height:inherit;white-space:pre}
+.fld:hover{text-decoration:underline}
+.fld.cur{background:var(--lcd-ink);color:var(--lcd-hi);text-decoration:none}
+.fld.edit{animation:edit .8s steps(2) infinite}
+@keyframes edit{50%{background:transparent;color:var(--lcd-ink)}}
+.inv{background:var(--lcd-ink);color:var(--lcd-hi);padding:0 4px}
+.lcdsteps{display:grid;grid-template-columns:repeat(16,1fr);gap:3px;margin:5px 0 4px}
+.lcdsteps i{height:7px;border:1px solid rgba(28,38,48,.35)}
+.lcdsteps i.beat{border-color:rgba(28,38,48,.8)}
+.lcdsteps i.on{background:var(--lcd-ink)}
+.lcd .msg{color:var(--lcd-dim)}
+.tabs{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;margin-top:4px}
+.tabs span{background:var(--lcd-ink);color:var(--lcd-hi);text-align:center;font-size:.85em;line-height:1.25;white-space:nowrap;overflow:hidden}
+.fkeys{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:clamp(6px,1.2vw,14px);padding:0 clamp(6px,2.2vw,26px)}
+.fk{display:grid;justify-items:center;gap:5px}
+.fk small{font-size:9px;font-weight:700;letter-spacing:.06em;background:#a9a69e;color:var(--body-hi);padding:0 7px;border-radius:2px;line-height:1.5}
+.fk .cap{min-width:0;width:100%;max-width:54px;min-height:22px;padding:0}
 
-/* ---------- hardware buttons ---------- */
-.ctrl{grid-area:ctrl;display:grid;gap:14px}
-.btnrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.hw{position:relative;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:38px;padding:0 13px;border-radius:6px;border:1px solid #121215;cursor:pointer;
-  background:linear-gradient(180deg,#4a4b53,#3a3b42);color:var(--ink);font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.14em;text-transform:uppercase;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 2px 0 #0d0d10;touch-action:manipulation;user-select:none;-webkit-user-select:none}
-.hw:active,.hw.pressed{transform:translateY(1px);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 1px 0 #0d0d10}
-.hw.big{min-height:46px;flex:1 1 0;min-width:64px}
-.hw.on{color:#fff}
-.hw.sq{min-width:42px;padding:0 10px}
-.hw.sel{background:linear-gradient(180deg,#5a5b64,#47484f);color:var(--gold)}
-.hw.queued{animation:blink .5s steps(2) infinite}
-@keyframes blink{50%{color:var(--muted)}}
-.hw .led{width:7px;height:7px}
-.group{display:grid;gap:7px}
-.tempo{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.bpmread{font-family:var(--f-lcd);font-size:30px;line-height:1;min-width:4.2ch;text-align:center;color:var(--g-hat);background:var(--well);border-radius:5px;padding:5px 8px 3px;box-shadow:inset 0 2px 5px rgba(0,0,0,.7);text-shadow:0 0 8px rgba(255,176,59,.45);font-variant-numeric:tabular-nums}
+/* ---------- keypad + data wheel ---------- */
+.clus{grid-area:clus;display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px 26px;align-items:center}
+.keypad{display:grid;grid-template-columns:repeat(3,46px);gap:10px 14px}
+.keypad .cap{min-width:0;width:100%;min-height:24px;padding:0}
+.center{display:grid;justify-items:center;gap:16px}
+.mainbtns{display:flex;gap:26px}
+.wheelwrap{display:grid;justify-items:center;gap:8px}
+.wheel{position:relative;width:clamp(124px,14vw,164px);aspect-ratio:1;max-width:100%;border-radius:50%;cursor:grab;touch-action:none;
+  background:radial-gradient(circle at 50% 42%,#3b3e43,#1b1d20 60%,#0f1012);
+  box-shadow:0 0 0 7px #26282c,0 0 0 8px #0d0e10,0 10px 16px rgba(0,0,0,.4)}
+.wheel::before{content:"";position:absolute;inset:-7px;border-radius:50%;background:repeating-conic-gradient(rgba(255,255,255,.28) 0 1.5deg,transparent 1.5deg 30deg);-webkit-mask:radial-gradient(circle,transparent 63%,#000 64%);mask:radial-gradient(circle,transparent 63%,#000 64%);opacity:.6}
+.wheel:active{cursor:grabbing}
+.rotor{position:absolute;inset:0;border-radius:50%}
+.dimple{position:absolute;width:24%;aspect-ratio:1;border-radius:50%;top:13%;left:38%;background:radial-gradient(circle at 42% 38%,#2c2f34,#0f1012);box-shadow:inset 0 2px 5px rgba(0,0,0,.85),0 1px 0 rgba(255,255,255,.08)}
 
-/* ---------- faders ---------- */
-.fad{grid-area:fad;display:grid;gap:10px;background:rgba(0,0,0,.16);border-radius:10px;padding:12px 14px 14px;box-shadow:inset 0 1px 3px rgba(0,0,0,.45)}
-.fadhead{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
-.fadhead .padname{font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.08em;text-transform:uppercase}
-.fader{display:grid;grid-template-columns:72px minmax(0,1fr) 54px;align-items:center;gap:10px}
-.fader output{font-family:var(--f-lcd);font-size:19px;text-align:right;color:var(--ink);font-variant-numeric:tabular-nums}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;margin:0;cursor:pointer;touch-action:pan-y}
-input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:#0e0e11;box-shadow:inset 0 1px 2px #000,0 1px 0 rgba(255,255,255,.06)}
-input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:#0e0e11;box-shadow:inset 0 1px 2px #000}
-input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:26px;margin-top:-10px;border-radius:3px;border:1px solid #0b0b0d;background:linear-gradient(180deg,#d9d6cf 0 44%,#1b1b1e 44% 56%,#bdbab2 56%);box-shadow:0 2px 3px rgba(0,0,0,.6)}
-input[type=range]::-moz-range-thumb{width:18px;height:26px;border-radius:3px;border:1px solid #0b0b0d;background:linear-gradient(180deg,#d9d6cf 0 44%,#1b1b1e 44% 56%,#bdbab2 56%)}
-.padtools{display:flex;flex-wrap:wrap;gap:8px}
-.padtools .hw{min-height:34px;font-size:12px}
+/* ---------- lower left: note variation, tap, cursor, transport ---------- */
+.low{grid-area:low;display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px 24px;align-items:start}
+.notevar{border:1.5px solid var(--ink-soft);border-radius:4px;padding:8px 10px 10px;display:grid;justify-items:center;gap:8px}
+.notevar>.lbl{white-space:normal;text-align:center;max-width:9ch}
+.vfader{position:relative;width:46px;height:132px;touch-action:none;cursor:ns-resize;--v:.5}
+.vfader::before{content:"";position:absolute;left:0;width:9px;top:10px;bottom:10px;background:repeating-linear-gradient(var(--ink-soft) 0 1px,transparent 1px 11px)}
+.vfader .slot{position:absolute;left:50%;top:8px;bottom:8px;width:6px;margin-left:-3px;background:#1d1e21;border-radius:3px;box-shadow:0 1px 0 rgba(255,255,255,.6)}
+.vfader .knob{position:absolute;left:4px;right:0;height:28px;top:calc((1 - var(--v)) * (100% - 28px));border-radius:3px;
+  background:linear-gradient(180deg,#fff,#ebe7e0 42%,var(--teal-dk) 43% 57%,#e5e1d9 58%,#cdc8bf);box-shadow:0 3px 0 #99948b,0 5px 8px rgba(0,0,0,.25)}
+.varval{font-family:var(--f-lcd);font-size:18px;line-height:1;color:var(--ink);white-space:nowrap}
+.lowmid{display:grid;gap:16px;align-content:start}
+.lowrow{display:flex;flex-wrap:wrap;gap:14px 22px;align-items:end;justify-content:space-between}
+.lowrow .cap.tall{min-height:44px;min-width:70px}
+.cross{display:grid;grid-template-columns:repeat(3,36px);grid-template-rows:repeat(3,30px);gap:2px}
+.cross .cap{min-width:0;min-height:0;width:100%;height:100%;padding:0;font-size:12px}
+.cross .u{grid-area:1/2}.cross .l{grid-area:2/1}.cross .r{grid-area:2/3}.cross .d{grid-area:3/2}
+.cross .lbl{grid-area:2/2;font-size:7.5px;letter-spacing:.04em}
+.transport{grid-column:1/-1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.transport .cap{width:100%;min-width:0;min-height:40px}
+.transport .lbl{white-space:normal;text-align:center;min-height:2.4em;align-items:end}
+
+/* ---------- right: control strip ---------- */
+.panel{grid-area:panel;background:linear-gradient(180deg,var(--teal-hi),var(--teal));border-radius:4px;padding:14px 16px 16px;display:flex;flex-wrap:wrap;gap:14px 20px;justify-content:space-between;align-items:stretch;box-shadow:inset 0 1px 0 rgba(255,255,255,.3),inset 0 -2px 0 rgba(0,0,0,.08)}
+.boxes{display:grid;gap:10px}
+.pbox{display:grid;grid-template-columns:repeat(2,minmax(64px,auto));gap:12px;background:linear-gradient(180deg,#e4e6e2,#d3d6d2);border-radius:3px;padding:8px 12px 10px;box-shadow:0 1px 0 rgba(255,255,255,.35),inset 0 1px 2px rgba(0,0,0,.08)}
+.pright{display:grid;gap:12px;align-content:space-between;flex:1 1 220px;min-width:0}
+.knobs{display:flex;justify-content:space-around;gap:16px}
+.knobctl{display:grid;justify-items:center;gap:5px}
+.knobctl .lbl{color:var(--teal-ink)}
+.knob{position:relative;width:56px;aspect-ratio:1;border-radius:50%;cursor:ns-resize;touch-action:none;--rot:0deg;
+  background:radial-gradient(circle at 40% 30%,#f4f2ee,#cfcbc3 55%,#a9a59c);box-shadow:0 0 0 3px rgba(34,64,62,.25),0 5px 7px rgba(0,0,0,.3)}
+.knob .ind{position:absolute;inset:0;transform:rotate(var(--rot))}
+.knob .ind::after{content:"";position:absolute;left:50%;top:4px;width:5px;height:40%;margin-left:-2.5px;border-radius:3px;background:var(--ink)}
+.knob.hot .ind::after{background:var(--orange)}
+.minmax{display:flex;justify-content:space-between;width:74px;font-size:8px;font-weight:700;letter-spacing:.08em;color:var(--teal-ink);text-transform:uppercase}
+.banks{display:grid;gap:6px}
+.banks .rule{display:flex;align-items:center;gap:8px;font-size:9.5px;font-weight:700;letter-spacing:.14em;color:var(--teal-ink);text-transform:uppercase}
+.banks .rule::before,.banks .rule::after{content:"";flex:1;border-top:1px solid rgba(34,64,62,.55)}
+.bankrow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.bankrow .cap{min-width:0;width:100%}
+.bankrow .lbl{color:var(--teal-ink)}
 
 /* ---------- pads ---------- */
-.padside{grid-area:pads;display:grid;gap:12px;align-content:start}
-.padbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
-.pads{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(8px,1.5vw,14px);padding:clamp(8px,1.4vw,14px);background:var(--well);border-radius:10px;box-shadow:inset 0 2px 8px rgba(0,0,0,.75)}
-.pad{--glow:var(--g-drum);position:relative;aspect-ratio:1;max-width:100%;border-radius:7px;border:1px solid var(--pad-edge);cursor:pointer;overflow:hidden;
-  background:radial-gradient(120% 90% at 50% 0%,#46474f,var(--pad) 60%,#33343a);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -3px 0 rgba(0,0,0,.35),inset 0 0 0 2px color-mix(in srgb,var(--glow) 14%,transparent),0 3px 0 #0a0a0c;
-  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;padding:0;text-align:left;transition:transform .05s}
+.padfield{grid-area:pads;background:linear-gradient(180deg,var(--teal),#6b9c9a);border-radius:4px;padding:10px clamp(12px,1.8vw,22px) clamp(16px,2vw,24px);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),inset 0 -2px 0 rgba(0,0,0,.08)}
+.padhead{display:flex;align-items:center;gap:10px;font-size:10px;font-weight:700;letter-spacing:.22em;color:var(--teal-ink);text-transform:uppercase;margin-bottom:6px}
+.padhead::before,.padhead::after{content:"";flex:1;border-top:1px solid rgba(34,64,62,.55)}
+.pads{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px clamp(10px,1.6vw,18px)}
+.padcell{display:grid;gap:4px;min-width:0}
+.padlbl{display:flex;justify-content:space-between;font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--teal-ink);text-transform:uppercase;padding:0 2px}
+.pad{--glow:var(--g-drum);position:relative;aspect-ratio:1;width:100%;max-width:100%;border-radius:3px;border:1px solid #4d5c5b;cursor:pointer;padding:0;text-align:left;
+  background:linear-gradient(180deg,var(--pad-hi),var(--pad) 45%,var(--pad-lo));
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.2),inset 0 -3px 0 rgba(0,0,0,.18),0 0 0 3px #5f8d8b,0 4px 0 #4a7270,0 7px 9px rgba(0,0,0,.25);
+  touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;transition:transform .05s}
 .pad::before{content:"";position:absolute;inset:0;border-radius:inherit;opacity:0;pointer-events:none;
-  background:radial-gradient(circle at 50% 50%,#fff 0%,var(--glow) 22%,color-mix(in srgb,var(--glow) 55%,transparent) 55%,color-mix(in srgb,var(--glow) 18%,transparent) 85%)}
-.pad::after{content:"";position:absolute;inset:-1px;border-radius:inherit;pointer-events:none;opacity:0;box-shadow:0 0 22px 2px var(--glow),inset 0 0 18px var(--glow)}
+  background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.95) 0%,color-mix(in srgb,var(--glow) 75%,#fff) 25%,color-mix(in srgb,var(--glow) 45%,transparent) 62%,color-mix(in srgb,var(--glow) 15%,transparent) 90%)}
+.pad::after{content:"";position:absolute;inset:-2px;border-radius:5px;pointer-events:none;opacity:0;box-shadow:0 0 18px 3px color-mix(in srgb,var(--glow) 80%,#fff)}
 .pad.hit::before{animation:flash .38s ease-out}
 .pad.hit::after{animation:flash .45s ease-out}
-.pad.down{transform:translateY(2px) scale(.985)}
-.pad.down::before{opacity:.85;animation:none}
-.pad.down::after{opacity:.9;animation:none}
-.pad.sel{border-color:color-mix(in srgb,var(--glow) 70%,#000)}
+.pad.down{transform:translateY(3px)}
+.pad.down::before{opacity:.7;animation:none}
+.pad.down::after{opacity:.75;animation:none}
+.pad.sel{border-color:#f4f2ee}
+.pad.drop{outline:2px dashed var(--orange);outline-offset:-6px}
 @keyframes flash{0%{opacity:1}100%{opacity:0}}
-.pad span{position:absolute;z-index:1;font-family:var(--f-display);text-transform:uppercase;pointer-events:none;mix-blend-mode:normal}
-.pad .pn{top:7px;left:9px;font-size:12px;font-weight:600;letter-spacing:.1em;color:rgba(220,216,206,.45)}
-.pad .pk{top:6px;right:8px;font-size:11px;font-weight:600;color:rgba(220,216,206,.4);border:1px solid rgba(220,216,206,.18);border-radius:3px;padding:0 4px;line-height:1.4}
-.pad .pname{left:9px;right:8px;bottom:7px;font-size:clamp(11px,1.25vw,14px);font-weight:600;letter-spacing:.06em;color:rgba(220,216,206,.75);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pad .smp{bottom:auto;top:26px;left:9px;font-size:10px;letter-spacing:.14em;color:var(--glow)}
-.pad.drop{outline:2px dashed var(--gold);outline-offset:-5px}
-.pad.hit .pname,.pad.down .pname{color:#fff}
+.pad span{position:absolute;z-index:1;pointer-events:none;text-transform:uppercase}
+.pad .pname{left:8px;right:6px;bottom:6px;font-size:clamp(10px,1.1vw,12.5px);font-weight:700;letter-spacing:.05em;color:rgba(28,42,41,.62);line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pad .smp{top:6px;left:8px;font-size:9px;font-weight:700;letter-spacing:.12em;color:rgba(255,255,255,.8)}
+.pad.muted .pname{color:rgba(28,42,41,.35);text-decoration:line-through}
+.pad.hit .pname,.pad.down .pname{color:rgba(20,30,30,.9)}
 
-/* ---------- sequencer panel ---------- */
-.seqpanel{background:var(--chassis-lo);border-radius:14px;padding:16px clamp(12px,2vw,22px) 18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 20px 40px -24px rgba(0,0,0,.8);display:grid;gap:12px;min-width:0}
-.seqhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
-.seqhead h2{margin:0;font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.12em;text-transform:uppercase}
-.seqhead h2 em{font-style:normal;color:var(--gold)}
-.seqhead p{margin:0;color:var(--muted);font-size:13.5px}
+.status{margin:-8px 0 0;color:var(--room-muted);font-size:13.5px;min-height:1.5em}
+
+/* ---------- step editor ---------- */
+.seqpanel{background:linear-gradient(180deg,var(--body-hi),var(--body));color:var(--ink);border-radius:12px;padding:16px clamp(12px,2vw,22px) 18px;display:grid;gap:12px;min-width:0;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.6),0 2px 0 var(--edge),0 6px 0 #8d897f,0 24px 40px -18px rgba(0,0,0,.7);scroll-margin-top:16px}
+.seqhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:6px 16px}
+.seqhead h2{margin:0;font-family:var(--f-logo);font-weight:400;font-size:16px;letter-spacing:.1em;text-transform:uppercase}
+.seqhead h2 em{font-style:normal;color:var(--red)}
+.seqhead p{margin:0;color:var(--ink-soft);font-size:13.5px;min-width:0}
 .gridscroll{overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch}
 .grid{display:grid;grid-template-columns:150px 28px repeat(var(--steps),minmax(20px,1fr));gap:3px;min-width:calc(190px + var(--steps) * 23px)}
-.rowhead{position:sticky;left:0;z-index:2;background:var(--chassis-lo);display:flex;align-items:center;gap:8px;padding-right:8px;cursor:pointer;border:0;text-align:left;font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);min-height:24px}
-.rowhead .dot{width:9px;height:9px;border-radius:2px;background:var(--glow);flex:none;box-shadow:0 0 6px color-mix(in srgb,var(--glow) 60%,transparent)}
-.rowhead .num{color:var(--muted);width:2ch;font-variant-numeric:tabular-nums}
-.rowhead.sel{color:var(--gold)}
-.mute{border:1px solid #2c2d33;border-radius:4px;background:#24252a;color:var(--muted);font-family:var(--f-display);font-weight:700;font-size:11px;cursor:pointer;padding:0;min-height:24px}
-.mute.on{background:var(--g-hat);color:#1a1300;border-color:var(--g-hat)}
-.cell{border:0;border-radius:3px;background:#26272c;min-height:24px;cursor:pointer;padding:0}
-.cell.b4{background:#2e2f35}
-.cell.bar2{box-shadow:inset 2px 0 0 rgba(201,164,92,.5)}
-.cell.on{background:var(--glow);box-shadow:0 0 8px color-mix(in srgb,var(--glow) 55%,transparent)}
-.cell.ph{outline:1px solid rgba(255,255,255,.55);outline-offset:-1px}
-.cell.ph.on{background:#fff}
-.ruler{font-family:var(--f-lcd);font-size:15px;color:var(--muted);text-align:center;line-height:1}
+.rowhead{position:sticky;left:0;z-index:2;background:var(--body);display:flex;align-items:center;gap:8px;padding:0 8px 0 0;cursor:pointer;border:0;text-align:left;font-weight:700;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);min-height:24px;min-width:0}
+.rowhead .nm{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rowhead .dot{width:9px;height:9px;border-radius:2px;background:var(--glow);flex:none}
+.rowhead .num{color:var(--ink-soft);width:2ch;flex:none;font-variant-numeric:tabular-nums}
+.rowhead.sel{color:var(--red)}
+.rowhead.mut{opacity:.45}
+.mute{border:1px solid var(--cap-edge);border-radius:3px;background:var(--cap);color:var(--ink-soft);font-weight:700;font-size:11px;cursor:pointer;padding:0;min-height:24px}
+.mute.on{background:var(--orange);border-color:#a24c12;color:#fff}
+.cell{border:0;border-radius:2px;background:#c6c2b8;min-height:24px;cursor:pointer;padding:0;font-family:var(--f-lcd);font-size:14px;line-height:1;color:#fff}
+.cell.b4{background:#b9b5ab}
+.cell.bar2{box-shadow:inset 2px 0 0 var(--red)}
+.cell.on{background:var(--glow)}
+.cell.mut.on{filter:saturate(.1)}
+.cell.ph{outline:2px solid var(--ink);outline-offset:-2px}
+.ruler{font-family:var(--f-lcd);font-size:15px;color:var(--ink-soft);text-align:center;line-height:1}
 .ruler.beat{color:var(--ink)}
 
-.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:14px 28px;color:var(--muted);font-size:14px}
-.notes h3{margin:0 0 4px;font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink)}
+.notes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:16px 28px;color:var(--room-muted);font-size:14px}
+.notes h3{margin:0 0 4px;font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--room-ink)}
 .notes p{margin:0}
-.toast{color:var(--muted);font-size:13px;min-height:1.4em}
+.notes b{color:var(--room-ink);font-weight:600}
 
-@media (max-width:860px){
-  .unit{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "lcd" "ctrl" "pads" "fad"}
-  .fader{grid-template-columns:62px minmax(0,1fr) 50px}
+@media (max-width:900px){
+  .unit{grid-template-columns:minmax(0,1fr);grid-template-areas:"brand" "lcd" "panel" "pads" "low" "clus"}
+  .brand{justify-items:start}
 }
-@media (max-width:520px){ .brand .name small{display:none} }
-@media (max-width:440px){
-  .lcd{font-size:19px}
-  .pad .pk{display:none}
-  .pad .pname{font-size:11px}
+@media (max-width:480px){
+  .keypad{grid-template-columns:repeat(3,38px);gap:9px 10px}
+  .clus{gap:14px 16px}
+  .mainbtns{gap:12px}
+  .mainbtns .cap{min-width:44px}
+  .transport{gap:7px}
+  .transport .lbl{font-size:8.5px;letter-spacing:.04em}
+  .pads{gap:10px}
+  .padlbl span:last-child{display:none}
+  .lowrow .cap.tall{min-width:60px}
 }
 @media (prefers-reduced-motion:reduce){
   .pad.hit::before,.pad.hit::after{animation-duration:.2s}
-  .hw.queued{animation:none;color:var(--gold)}
+  .led.blink,.fld.edit{animation:none}
 }
 </style>
 </head>
 <body>
 <main class="wrap">
   <header class="intro">
-    <h1>Fantasy <span>16</span></h1>
-    <p>Tap the pads or play them from your keyboard. <kbd>Space</kbd> plays and stops, <kbd>Enter</kbd> arms record, <kbd>N</kbd> toggles note repeat, <kbd>[</kbd> <kbd>]</kbd> nudge the tempo. Drop an audio file on any pad to sample it.</p>
+    <h1>Fantasy 16</h1>
+    <p>Tap the pads or use the keys <kbd>1–4</kbd> <kbd>Q–R</kbd> <kbd>A–F</kbd> <kbd>Z–V</kbd>. <kbd>Space</kbd> plays from the top and stops, <kbd>Enter</kbd> arms record, <kbd>T</kbd> taps tempo, <kbd>N</kbd> latches note repeat. Click any value on the screen, then turn the data wheel or use the arrow keys.</p>
   </header>
 
   <section class="unit" aria-label="Fantasy 16 sampler">
-    <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+    <div class="lcdzone">
+      <div class="bezel">
+        <div class="tag">Integrated rhythm machine · 16-bit drum sampler · loop sequencer</div>
+        <div class="lcd" id="lcd">
+          <div class="row"><span>Seq:<button class="fld" data-f="seq"></button> Bars:<button class="fld" data-f="bars"></button></span><span>Now:<span id="lcdNow">001.1.1</span> <span id="lcdMode" class="inv">STOP</span></span></div>
+          <div class="row"><span>Bpm:<button class="fld" data-f="bpm"></button> Swing:<button class="fld" data-f="swing"></button></span><span>Rpt:<button class="fld" data-f="rate"></button></span></div>
+          <div class="row"><span>Pad:<button class="fld" data-f="pad"></button> <span id="lcdPadName"></span></span><span>Velo:<span id="lcdVelo">100</span></span></div>
+          <div class="row"><span>Tune:<button class="fld" data-f="tune"></button> Decay:<button class="fld" data-f="decay"></button> Lvl:<button class="fld" data-f="level"></button></span><span>Rev:<button class="fld" data-f="reverb"></button></span></div>
+          <div class="lcdsteps" id="lcdSteps" aria-hidden="true"></div>
+          <div class="row msg"><span id="lcdMsg">Tap a pad to power up</span></div>
+          <div class="tabs" aria-hidden="true"><span id="tab0">BARS</span><span id="tab1">COPY</span><span id="tab2">CLEAR</span><span id="tab3">METRO</span><span id="tab4">LOAD</span><span id="tab5">CHOP</span></div>
+        </div>
+      </div>
+      <div class="fkeys">
+        <div class="fk"><small>F1</small><button class="cap" data-fk="0" aria-label="F1: switch between 1 and 2 bars"></button></div>
+        <div class="fk"><small>F2</small><button class="cap" data-fk="1" aria-label="F2: copy this sequence to the next empty slot"></button></div>
+        <div class="fk"><small>F3</small><button class="cap" data-fk="2" aria-label="F3: clear this sequence"></button></div>
+        <div class="fk"><small>F4</small><button class="cap" data-fk="3" aria-label="F4: metronome on or off"></button></div>
+        <div class="fk"><small>F5</small><button class="cap" data-fk="4" aria-label="F5: load or unload a sample on the selected pad"></button></div>
+        <div class="fk"><small>F6</small><button class="cap" data-fk="5" aria-label="F6: chop a sample across pads 9 to 16"></button></div>
+      </div>
+    </div>
+
     <div class="brand">
-      <div class="name">Fantasy 16 <small>Sampling drum machine · 16 pads</small></div>
-      <div class="power"><span class="led green" id="pwrLed"></span><span id="pwrText">Tap a pad to power up</span></div>
+      <div class="logo"><span class="o">FANTASY</span><span class="s">16</span></div>
+      <div class="stripe"></div>
+      <div class="sub">Sampling production center</div>
     </div>
 
-    <div class="lcdbox">
-      <div class="lcd" aria-live="off">
-        <div class="row"><span id="lcdSeq">SEQ:A 1 BAR</span><span id="lcdTempo">BPM:082.0 SW:54%</span></div>
-        <div class="row"><span id="lcdNow">NOW:001.1.1</span><span id="lcdMode" class="inv">STOP</span></div>
-        <canvas id="scope" width="600" height="116" aria-hidden="true"></canvas>
-        <div class="row"><span id="lcdPad">PAD 01 808 KICK</span><span id="lcdMsg" class="dim"></span></div>
-      </div>
-      <div class="steps" id="stepLeds" aria-hidden="true"></div>
-    </div>
-
-    <div class="ctrl">
-      <div class="btnrow">
-        <button class="hw big" id="recBtn" aria-pressed="false"><span class="led" id="recLed"></span>Rec</button>
-        <button class="hw big" id="stopBtn">Stop</button>
-        <button class="hw big" id="playBtn" aria-pressed="false"><span class="led green" id="playLed"></span>Play</button>
-      </div>
-      <div class="btnrow">
-        <button class="hw" id="rptBtn" aria-pressed="false"><span class="led amber" id="rptLed"></span>Note rpt</button>
-        <button class="hw" id="rateBtn" title="Note repeat rate">1/16</button>
-        <button class="hw" id="metroBtn" aria-pressed="false"><span class="led amber" id="metroLed"></span>Metro</button>
-        <button class="hw" id="undoBtn">Undo</button>
-        <button class="hw" id="clearBtn">Clear seq</button>
-      </div>
-      <div class="group">
-        <span class="silk">Sequence</span>
-        <div class="btnrow" id="seqBtns">
-          <button class="hw sq" data-seq="0">A</button>
-          <button class="hw sq" data-seq="1">B</button>
-          <button class="hw sq" data-seq="2">C</button>
-          <button class="hw sq" data-seq="3">D</button>
-          <button class="hw" id="barsBtn">1 bar</button>
-          <button class="hw" id="copyBtn" title="Copy this sequence into the next empty slot">Copy</button>
+    <div class="clus">
+      <div class="keypad" id="keypad"></div>
+      <div class="center">
+        <div class="mainbtns">
+          <div class="ctl"><span class="lbl">Main screen</span><button class="cap" id="mainBtn" aria-label="Main screen" title="Put the cursor back on the tempo"></button></div>
+          <div class="ctl"><span class="lbl">Open window</span><button class="cap orange" id="windowBtn" aria-label="Open window" title="Open the step editor"></button></div>
+        </div>
+        <div class="wheelwrap">
+          <span class="lbl">Data</span>
+          <div class="wheel" id="wheel" role="slider" tabindex="0" aria-label="Data wheel: changes the highlighted value on the screen"><div class="rotor" id="rotor"><div class="dimple"></div></div></div>
         </div>
       </div>
-      <div class="group">
-        <span class="silk">Tempo &amp; swing</span>
-        <div class="tempo">
-          <button class="hw sq" id="bpmDown" aria-label="Slower">−</button>
-          <output class="bpmread" id="bpmRead">82</output>
-          <button class="hw sq" id="bpmUp" aria-label="Faster">+</button>
-          <button class="hw" id="tapBtn">Tap</button>
+    </div>
+
+    <div class="low">
+      <div class="notevar">
+        <span class="lbl">Note variation</span>
+        <div class="ctl"><span class="lbl"><span class="led" id="afterLed"></span>Decay</span><button class="cap" id="afterBtn" aria-label="Note variation controls decay" title="Switch the slider between tune and decay"></button></div>
+        <div class="vfader" id="vfader" role="slider" tabindex="0" aria-label="Note variation"><div class="slot"></div><div class="knob"></div></div>
+        <span class="varval" id="varVal">TUNE +0</span>
+      </div>
+      <div class="lowmid">
+        <div class="lowrow">
+          <div class="ctl"><span class="lbl" style="white-space:normal;text-align:center"><span class="led" id="rptLed"></span>Tap tempo<br>note repeat</span><button class="cap tall" id="tapBtn" aria-label="Tap tempo, hold for note repeat" title="Tap for tempo. Hold while playing pads for note repeat."></button></div>
+          <div class="ctl"><span class="lbl">Undo seq</span><button class="cap" id="undoBtn" aria-label="Undo"></button></div>
+          <div class="ctl"><span class="lbl">Erase</span><button class="cap" id="eraseBtn" aria-label="Erase: hold, then tap a pad" title="Hold, then tap a pad to erase its hits"></button></div>
+          <div class="cross">
+            <button class="cap u" data-cur="up" aria-label="Increase value">▲</button>
+            <button class="cap l" data-cur="left" aria-label="Cursor left">◀</button>
+            <span class="lbl">Cursor</span>
+            <button class="cap r" data-cur="right" aria-label="Cursor right">▶</button>
+            <button class="cap d" data-cur="down" aria-label="Decrease value">▼</button>
+          </div>
         </div>
-        <div class="fader"><label class="silk" for="swing">Swing</label><input type="range" id="swing" min="50" max="75" step="1" value="54"><output id="swingOut">54%</output></div>
+        <div class="transport">
+          <div class="ctl"><span class="lbl"><span class="led red" id="recLed"></span>Rec</span><button class="cap red" id="recBtn" aria-label="Record arm"></button></div>
+          <div class="ctl"><span class="lbl"><span class="led red" id="odLed"></span>Over dub</span><button class="cap red" id="odBtn" aria-label="Overdub: record and play"></button></div>
+          <div class="ctl"><span class="lbl">Stop</span><button class="cap" id="stopBtn" aria-label="Stop"></button></div>
+          <div class="ctl"><span class="lbl"><span class="led" id="playLed"></span>Play</span><button class="cap" id="playBtn" aria-label="Play from current position"></button></div>
+          <div class="ctl"><span class="lbl">Play start</span><button class="cap" id="startBtn" aria-label="Play from the start"></button></div>
+        </div>
       </div>
     </div>
 
-    <div class="fad">
-      <div class="fadhead"><span class="silk">Q-link · selected pad</span><span class="padname" id="selName">808 Kick</span></div>
-      <div class="fader"><label class="silk" for="fTune">Tune</label><input type="range" id="fTune" min="-12" max="12" step="1" value="0"><output id="oTune">0 st</output></div>
-      <div class="fader"><label class="silk" for="fDecay">Decay</label><input type="range" id="fDecay" min="0.1" max="2" step="0.05" value="1"><output id="oDecay">1.00×</output></div>
-      <div class="fader"><label class="silk" for="fLevel">Level</label><input type="range" id="fLevel" min="0" max="1" step="0.01" value="0.8"><output id="oLevel">80</output></div>
-      <div class="fadhead" style="margin-top:6px"><span class="silk">Master</span></div>
-      <div class="fader"><label class="silk" for="fCut">Filter</label><input type="range" id="fCut" min="0" max="1" step="0.005" value="1"><output id="oCut">Open</output></div>
-      <div class="fader"><label class="silk" for="fRev">Reverb</label><input type="range" id="fRev" min="0" max="1" step="0.01" value="0.35"><output id="oRev">35</output></div>
+    <div class="panel">
+      <div class="boxes">
+        <div class="pbox">
+          <div class="ctl"><span class="lbl"><span class="led" id="fullLed"></span>Full level</span><button class="cap" id="fullBtn" aria-label="Full level" title="On: every hit is full volume. Off: hit higher on a pad to play louder."></button></div>
+          <div class="ctl"><span class="lbl"><span class="led" id="lvlLed"></span>16 levels</span><button class="cap" id="lvlBtn" aria-label="16 levels" title="Spread the selected sound across all 16 pads, tuned in semitones"></button></div>
+        </div>
+        <div class="pbox">
+          <div class="ctl"><span class="lbl"><span class="led" id="nextLed"></span>Next seq</span><button class="cap" id="nextBtn" aria-label="Next sequence" title="Jump to the next sequence at the end of the bar"></button></div>
+          <div class="ctl"><span class="lbl"><span class="led" id="tmLed"></span>Track mute</span><button class="cap" id="tmBtn" aria-label="Track mute" title="While on, tapping a pad mutes or unmutes its track"></button></div>
+        </div>
+      </div>
+      <div class="pright">
+        <div class="knobs">
+          <div class="knobctl"><span class="lbl">Filter</span><div class="knob hot" id="cutKnob" role="slider" tabindex="0" aria-label="Master filter" aria-valuemin="0" aria-valuemax="100"><div class="ind"></div></div><div class="minmax"><span>Low</span><span>Open</span></div></div>
+          <div class="knobctl"><span class="lbl">Main volume</span><div class="knob" id="volKnob" role="slider" tabindex="0" aria-label="Main volume" aria-valuemin="0" aria-valuemax="100"><div class="ind"></div></div><div class="minmax"><span>Min</span><span>Max</span></div></div>
+        </div>
+        <div class="banks">
+          <div class="rule">Sequence</div>
+          <div class="bankrow" id="seqBtns">
+            <div class="ctl"><span class="lbl"><span class="led"></span>A</span><button class="cap" data-seq="0" aria-label="Sequence A"></button></div>
+            <div class="ctl"><span class="lbl"><span class="led"></span>B</span><button class="cap" data-seq="1" aria-label="Sequence B"></button></div>
+            <div class="ctl"><span class="lbl"><span class="led"></span>C</span><button class="cap" data-seq="2" aria-label="Sequence C"></button></div>
+            <div class="ctl"><span class="lbl"><span class="led"></span>D</span><button class="cap" data-seq="3" aria-label="Sequence D"></button></div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="padside">
-      <div class="padbar"><span class="silk">Pad bank A</span><span class="silk" id="padHint">Hold pads with note repeat on to roll</span></div>
+    <div class="padfield">
+      <div class="padhead">Drums</div>
       <div class="pads" id="pads"></div>
-      <div class="padtools">
-        <button class="hw" id="loadBtn">Load sample to pad</button>
-        <button class="hw" id="chopBtn" title="Slice one sample into 8 equal parts on pads 9–16">Chop to 9–16</button>
-        <button class="hw" id="resetPadBtn">Reset pad</button>
-        <input type="file" id="loadFile" accept="audio/*" hidden>
-        <input type="file" id="chopFile" accept="audio/*" hidden>
-      </div>
-      <div class="toast" id="toast">Drop an audio file on a pad, or load one into the selected pad. Samples stay loaded until you reload the page; patterns and settings are remembered in this browser.</div>
     </div>
+
+    <input type="file" id="loadFile" accept="audio/*" hidden>
+    <input type="file" id="chopFile" accept="audio/*" hidden>
   </section>
 
-  <section class="seqpanel" aria-label="Step sequencer">
+  <p class="status" id="toast">Drop an audio file on any pad to sample it. Samples stay loaded until you reload; patterns and settings are remembered in this browser.</p>
+
+  <section class="seqpanel" id="seqpanel" aria-label="Step editor">
     <div class="seqhead">
-      <h2>Sequence <em id="seqTitle">A</em></h2>
-      <p>Click or drag across cells to place hits. <strong>M</strong> mutes a track. Sequences A and B start with example loops; C and D are blank.</p>
+      <h2>Step edit · Seq <em id="seqTitle">A</em></h2>
+      <p>Click or drag across cells to place hits. Faded cells are softer hits; numbers are 16 Levels tunings. <strong>M</strong> mutes a track.</p>
     </div>
     <div class="gridscroll"><div class="grid" id="grid"></div></div>
   </section>
 
   <section class="notes">
-    <div><h3>Recording a loop</h3><p>Press Rec, then Play. Every pad you hit lands on the nearest sixteenth note and loops back on the next pass. Play another layer on top the same way. Undo takes back the last pass.</p></div>
-    <div><h3>Chopping a sample</h3><p>Chop to 9–16 slices an audio file into eight equal pieces across the top two rows, the way soul records get flipped. Retune each slice with the Tune fader.</p></div>
-    <div><h3>Swing</h3><p>Swing pushes every second sixteenth late. 50% is straight; around 54–58% gives the loose head-nod feel the classic samplers are known for; 66% is a full triplet shuffle.</p></div>
+    <div><h3>Record a loop</h3><p>Press <b>Over dub</b> to start recording right away, or arm <b>Rec</b> and press <b>Play start</b>. Hits snap to the nearest sixteenth and loop back each pass. <b>Undo seq</b> takes back the last pass.</p></div>
+    <div><h3>Edit on the screen</h3><p>Click a value on the LCD or move to it with the <b>cursor</b> keys. Turn the <b>data wheel</b>, press ▲ ▼, or type a number on the keypad and press <b>Enter</b>.</p></div>
+    <div><h3>16 Levels</h3><p>Select a pad and turn on <b>16 Levels</b>. All sixteen pads now play that sound in semitones, with pad 5 at its original pitch. Chop a soul record with <b>F6</b>, then play a slice up high for the sped-up vocal sound.</p></div>
+    <div><h3>Repeat, erase, mute</h3><p>Hold <b>Tap tempo</b> while playing pads to roll them. Hold <b>Erase</b> and tap a pad to wipe its hits. Turn on <b>Track mute</b> and tap pads to drop parts in and out.</p></div>
   </section>
 </main>
 
@@ -294,6 +411,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:26px;border-radius:3px;bor
 (() => {
 "use strict";
 const $ = s => document.querySelector(s);
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 
 // Pad 1 is bottom-left, like the hardware. Keys follow the 1234/QWER/ASDF/ZXCV layout, bottom row = ZXCV.
 const PADS = [
@@ -321,13 +439,14 @@ const DISPLAY_ORDER = [12,13,14,15, 8,9,10,11, 4,5,6,7, 0,1,2,3];
 const SEQ_NAMES = "ABCD";
 const STORE = "fantasy16-v1";
 const RATES = [{label:"1/8", every:2, sub:1}, {label:"1/16", every:1, sub:1}, {label:"1/32", every:1, sub:2}];
+const LEVEL_BASE = 4; // in 16 Levels, pad 5 plays the sound at its original pitch
 
 // ---------- state ----------
 const emptyGrid = () => Array.from({length:16}, () => new Array(32).fill(0));
 function pattern(bars, hits){
   const grid = emptyGrid();
   for (const [pad, steps] of Object.entries(hits)) steps.forEach(s => grid[pad][s] = 1);
-  return {bars, grid};
+  return {bars, grid, tune:emptyGrid()};
 }
 const demoPatterns = () => [
   pattern(1, {0:[0,7,10], 2:[4,12], 3:[0,2,4,6,8,10,12], 4:[14], 7:[0,10], 10:[0]}),
@@ -335,16 +454,18 @@ const demoPatterns = () => [
   pattern(1, {}), pattern(1, {}),
 ];
 const defaults = () => ({
-  bpm:82, swing:54, cur:0, metro:false, cutoff:1, reverb:.35, rate:1,
+  bpm:82, swing:54, cur:0, metro:false, cutoff:1, reverb:.35, rate:1, volume:.85, fullLevel:true,
   pats:demoPatterns(),
   pad:PADS.map(() => ({tune:0, decay:1, level:.8})),
   mute:new Array(16).fill(false),
 });
+const isGrid = g => Array.isArray(g) && g.length === 16 && g.every(r => Array.isArray(r) && r.length === 32);
 function load(){
   try{
     const s = JSON.parse(localStorage.getItem(STORE));
     if (!s || !Array.isArray(s.pats) || s.pats.length !== 4 || !Array.isArray(s.pad) || s.pad.length !== 16) return null;
-    if (!s.pats.every(p => Array.isArray(p.grid) && p.grid.length === 16 && p.grid.every(r => r.length === 32))) return null;
+    if (!s.pats.every(p => isGrid(p.grid))) return null;
+    s.pats.forEach(p => { if (!isGrid(p.tune)) p.tune = emptyGrid(); });
     return Object.assign(defaults(), s);
   }catch{ return null; }
 }
@@ -355,13 +476,16 @@ function save(){
   saveTimer = setTimeout(() => { try{ localStorage.setItem(STORE, JSON.stringify(S)); }catch{} }, 250);
 }
 
-let selected = 0, playing = false, recArmed = false, noteRepeat = false, queued = null;
-const held = new Set();
+let selected = 0, playing = false, recArmed = false, queued = null;
+let rptLatch = false, rptHold = false, padDuringHold = false;
+let levels16 = false, levelSrc = 0, trackMute = false, eraseHeld = false, varParam = "tune";
+const noteRepeat = () => rptLatch || rptHold;
+const held = new Map(); // physical pad -> velocity
 const samples = new Array(16).fill(null);
 const undoStack = [];
 
 // ---------- audio graph ----------
-let ctx = null, master, filter, comp, analyser, revIn, noiseBuf, clockTimer = 0;
+let ctx = null, master, filter, comp, revIn, noiseBuf;
 const bus = [], live = new Array(16).fill(null);
 const st = s => Math.pow(2, s / 12);
 const midi = n => 440 * Math.pow(2, (n - 69) / 12);
@@ -370,26 +494,26 @@ const cutoffHz = v => 120 * Math.pow(20000 / 120, v);
 function ensureAudio(){
   if (ctx){ if (ctx.state === "suspended") ctx.resume(); return; }
   const AC = window.AudioContext || window.webkitAudioContext;
-  if (!AC){ flashMsg("NO AUDIO"); return; }
+  if (!AC){ flashMsg("NO AUDIO IN THIS BROWSER"); return; }
   ctx = new AC({latencyHint:"interactive"});
-  master = gain(.85);
+  master = gain(S.volume);
   filter = filt("lowpass", cutoffHz(S.cutoff), .8);
   comp = ctx.createDynamicsCompressor();
   comp.threshold.value = -12; comp.knee.value = 8; comp.ratio.value = 4; comp.attack.value = .003; comp.release.value = .18;
-  analyser = ctx.createAnalyser(); analyser.fftSize = 2048;
-  chain(master, filter, comp, analyser, ctx.destination);
+  const pre = gain(1);
+  chain(pre, filter, comp, master, ctx.destination);
   const reverb = ctx.createConvolver(); reverb.buffer = makeImpulse(2.8, 2.6);
   revIn = gain(S.reverb);
   chain(revIn, reverb, gain(.9), filter);
   noiseBuf = makeNoise();
   PADS.forEach((p, i) => {
-    const b = gain(S.pad[i].level); b.connect(master);
+    const b = gain(S.pad[i].level); b.connect(pre);
     const s = gain(SEND[p.g]); b.connect(s); s.connect(revIn);
     bus[i] = b;
   });
   nextT = ctx.currentTime + .06;
-  clockTimer = setInterval(scheduler, 25);
-  $("#pwrLed").classList.add("on"); $("#pwrText").textContent = "Power";
+  setInterval(scheduler, 25);
+  flashMsg("READY");
   requestAnimationFrame(frame);
 }
 function gain(v = 1){ const g = ctx.createGain(); g.gain.value = v; return g; }
@@ -568,8 +692,9 @@ function playSample(t, o, p, smp){
 }
 
 const visQ = [];
-function trigger(i, t, vel = 1){
-  const def = PADS[i], p = S.pad[i];
+// i = sound source pad, off = extra semitones (16 Levels), flash = physical pad to light
+function trigger(i, t, vel = 1, off = 0, flash = i){
+  const def = PADS[i], p = off ? {...S.pad[i], tune:S.pad[i].tune + off} : S.pad[i];
   if (def.mono || samples[i]) cutVoice(i, t);
   if (def.choke) PADS.forEach((d, j) => { if (j !== i && d.choke === def.choke) cutVoice(j, t); });
   const out = gain(vel); out.connect(bus[i]);
@@ -578,7 +703,7 @@ function trigger(i, t, vel = 1){
   catch(e){ end = t + .1; }
   live[i] = out;
   setTimeout(() => { try{ out.disconnect(); }catch{} if (live[i] === out) live[i] = null; }, Math.max(0, end - ctx.currentTime + .3) * 1000);
-  visQ.push({i, t});
+  visQ.push({i:flash, t});
 }
 function cutVoice(j, t){
   const g = live[j]; if (!g) return;
@@ -589,6 +714,7 @@ function click(t, accent){
   const o = osc("square", accent ? 1600 : 1050, t, t + .04), g = gain(0);
   env(g, t, accent ? .25 : .15, .03); chain(o, g, comp);
 }
+const resolve = i => levels16 ? {src:levelSrc, off:i - LEVEL_BASE} : {src:i, off:0};
 
 // ---------- clock & sequencer ----------
 const LOOKAHEAD = .12;
@@ -616,14 +742,16 @@ function scheduleStep(t0){
     pos = seqAbs % len;
     if (pos === 0){
       recPassDirty = false;
-      if (queued !== null){ S.cur = queued; queued = null; len = patLen(); renderSeq(); save(); }
+      if (queued !== null){ S.cur = queued; queued = null; len = patLen(); pos = seqAbs % len; renderSeq(); save(); }
     }
-    const grid = curPat().grid;
+    const pat = curPat();
     for (let i = 0; i < 16; i++){
-      if (!grid[i][pos] || S.mute[i]) continue;
-      const key = i + ":" + seqAbs;
-      if (skip.has(key)){ skip.delete(key); fired.add(i); continue; }
-      trigger(i, t, grid[i][pos]); fired.add(i);
+      const v = pat.grid[i][pos];
+      if (!v || S.mute[i]) continue;
+      const key = i + ":" + seqAbs, off = pat.tune[i][pos];
+      fired.add(i + ":" + off);
+      if (skip.has(key)){ skip.delete(key); continue; }
+      trigger(i, t, v, off, levels16 && i === levelSrc ? clamp(off + LEVEL_BASE, 0, 15) : i);
     }
     if (S.metro && pos % 4 === 0) click(t, pos % 16 === 0);
     stepQ.push({t, pos, seq:S.cur});
@@ -631,65 +759,91 @@ function scheduleStep(t0){
     seqAbs++;
   }
   const rate = RATES[S.rate];
-  if (noteRepeat && held.size && clockStep % rate.every === 0){
-    for (const i of held){
-      if (!fired.has(i)) trigger(i, t);
-      if (rate.sub === 2) trigger(i, t + sd / 2);
-      if (playing && recArmed && pos >= 0) writeHit(i, pos);
+  if (noteRepeat() && held.size && clockStep % rate.every === 0){
+    for (const [i, vel] of held){
+      const {src, off} = resolve(i);
+      if (!fired.has(src + ":" + off)) trigger(src, t, vel, off, i);
+      if (rate.sub === 2) trigger(src, t + sd / 2, vel, off, i);
+      if (playing && recArmed && pos >= 0) writeHit(src, pos, vel, off);
     }
   }
   clockStep++;
 }
-function writeHit(i, pos){
-  const g = curPat().grid;
-  if (g[i][pos]) return;
+function writeHit(i, pos, vel, off){
+  const pat = curPat();
+  if (pat.grid[i][pos] && pat.tune[i][pos] === off) return;
   if (!recPassDirty){ pushUndo(); recPassDirty = true; }
-  g[i][pos] = 1; paintCell(i, pos); save();
+  pat.grid[i][pos] = Math.max(.05, Math.round(vel * 100) / 100); pat.tune[i][pos] = off;
+  paintCell(i, pos); save();
 }
-function recordLiveHit(i){
+function recordLiveHit(src, vel, off){
   if (!(playing && recArmed) || lastSched < 0) return;
   const n = lastSched + Math.round((ctx.currentTime - lastSchedT0) / stepDur());
   const len = patLen(), pos = ((n % len) + len) % len;
-  if (n > lastSched) skip.add(i + ":" + n);
-  writeHit(i, pos);
+  if (n > lastSched) skip.add(src + ":" + n);
+  writeHit(src, pos, vel, off);
 }
-function play(){
+function play(fromStart){
   ensureAudio(); if (!ctx || playing) return;
-  playing = true; seqAbs = 0; clockStep = 0; lastSched = -1; skip.clear(); recPassDirty = false;
+  if (fromStart) seqAbs = 0;
+  playing = true; clockStep = seqAbs; lastSched = -1; skip.clear(); recPassDirty = false;
   if (queued !== null){ S.cur = queued; queued = null; renderSeq(); }
   nextT = ctx.currentTime + .06;
   updateTransport();
 }
 function stop(){
+  if (!playing){ seqAbs = 0; showNow(0); flashMsg("LOCATE: START"); return; }
   playing = false; queued = null; stepQ.length = 0; skip.clear();
   setPlayhead(-1); updateTransport(); updateSeqButtons();
-  $("#lcdNow").textContent = "NOW:001.1.1";
+}
+function selectSeq(n){
+  if (playing && n !== S.cur){ queued = n; updateSeqButtons(); flashMsg(`NEXT SEQ: ${SEQ_NAMES[n]}`); return; }
+  queued = null; S.cur = n; renderSeq(); save();
+}
+function setBars(n){
+  const p = curPat(); if (p.bars === n) return;
+  pushUndo();
+  if (n === 2 && p.grid.every(r => r.slice(16).every(v => !v))){
+    p.grid.forEach(r => { for (let s = 0; s < 16; s++) r[s + 16] = r[s]; });
+    p.tune.forEach(r => { for (let s = 0; s < 16; s++) r[s + 16] = r[s]; });
+  }
+  p.bars = n; renderSeq(); save();
 }
 
 // ---------- undo ----------
+const copyPat = p => ({bars:p.bars, grid:p.grid.map(r => r.slice()), tune:p.tune.map(r => r.slice())});
 function pushUndo(){
-  undoStack.push({seq:S.cur, bars:curPat().bars, grid:curPat().grid.map(r => r.slice())});
+  undoStack.push({seq:S.cur, pat:copyPat(curPat())});
   if (undoStack.length > 40) undoStack.shift();
 }
 function undo(){
   const u = undoStack.pop();
   if (!u){ flashMsg("NOTHING TO UNDO"); return; }
-  S.pats[u.seq] = {bars:u.bars, grid:u.grid};
-  if (u.seq !== S.cur) S.cur = u.seq;
-  recPassDirty = false;
-  renderSeq(); save(); flashMsg("UNDO");
+  S.pats[u.seq] = u.pat; S.cur = u.seq; recPassDirty = false;
+  renderSeq(); save(); flashMsg("UNDO SEQ");
 }
 
-// ---------- pad input ----------
+// ---------- pads ----------
 const padEls = [];
-function padDown(i){
+function padDown(i, vel){
   ensureAudio(); if (!ctx) return;
-  held.add(i);
   padEls[i].classList.add("down");
-  selectPad(i);
-  if (noteRepeat) return; // repeats start on the next grid tick, like the hardware
-  trigger(i, ctx.currentTime);
-  recordLiveHit(i);
+  if (rptHold) padDuringHold = true;
+  if (trackMute){
+    S.mute[i] = !S.mute[i]; refreshPads(); renderSeq(); save();
+    flashMsg(`TRACK ${i + 1} ${S.mute[i] ? "MUTED" : "ON"}`); return;
+  }
+  const {src, off} = resolve(i);
+  if (eraseHeld){
+    pushUndo(); const pat = curPat(); pat.grid[src].fill(0); pat.tune[src].fill(0);
+    renderSeq(); save(); flashMsg(`ERASED PAD ${src + 1}`); return;
+  }
+  held.set(i, vel);
+  $("#lcdVelo").textContent = String(Math.round(vel * 100)).padStart(3, "0");
+  if (!levels16) selectPad(i);
+  if (noteRepeat()) return; // repeats start on the next grid tick, like the hardware
+  trigger(src, ctx.currentTime, vel, off, i);
+  recordLiveHit(src, vel, off);
 }
 function padUp(i){
   held.delete(i);
@@ -697,36 +851,49 @@ function padUp(i){
 }
 function selectPad(i){
   selected = i;
-  padEls.forEach((el, j) => el.classList.toggle("sel", j === i));
-  document.querySelectorAll(".rowhead").forEach((el, j) => el.classList.toggle("sel", +el.dataset.i === i));
-  updateFaders(); updateLcdPad();
+  refreshPads();
+  document.querySelectorAll(".rowhead[data-i]").forEach(el => el.classList.toggle("sel", +el.dataset.i === i));
+  updateLcd(); updateTabs(); paintVar();
 }
-function padLabel(i){ return samples[i] ? samples[i].name : PADS[i].name; }
+const padLabel = i => samples[i] ? samples[i].name : PADS[i].name;
+const fmtSigned = n => n > 0 ? "+" + n : n < 0 ? "-" + (-n) : "+0";
 
 function buildPads(){
   const wrap = $("#pads");
   DISPLAY_ORDER.forEach(i => {
-    const p = PADS[i], el = document.createElement("button");
-    el.className = "pad"; el.dataset.i = i; el.style.setProperty("--glow", GLOW[p.g]);
-    el.setAttribute("aria-label", `Pad ${i + 1}`);
-    el.innerHTML = `<span class="pn">${i + 1}</span><span class="pk">${p.key.toUpperCase()}</span><span class="smp"></span><span class="pname"></span>`;
-    el.addEventListener("pointerdown", e => { e.preventDefault(); try{ el.setPointerCapture(e.pointerId); }catch{} padDown(i); });
-    const up = () => { if (held.has(i)) padUp(i); };
+    const p = PADS[i], cell = document.createElement("div");
+    cell.className = "padcell";
+    cell.innerHTML = `<div class="padlbl"><span>Pad ${i + 1}</span><span>${p.key.toUpperCase()}</span></div>`;
+    const el = document.createElement("button");
+    el.className = "pad"; el.setAttribute("aria-label", `Pad ${i + 1}`);
+    el.innerHTML = `<span class="smp"></span><span class="pname"></span>`;
+    const velAt = e => {
+      if (S.fullLevel) return 1;
+      const r = el.getBoundingClientRect();
+      return clamp(1 - (e.clientY - r.top) / r.height * .9, .15, 1);
+    };
+    el.addEventListener("pointerdown", e => { e.preventDefault(); try{ el.setPointerCapture(e.pointerId); }catch{} padDown(i, velAt(e)); });
+    const up = () => padUp(i);
     el.addEventListener("pointerup", up); el.addEventListener("pointercancel", up); el.addEventListener("lostpointercapture", up);
-    el.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat){ e.preventDefault(); e.stopPropagation(); padDown(i); } });
+    el.addEventListener("keydown", e => { if ((e.key === " " || e.key === "Enter") && !e.repeat){ e.preventDefault(); e.stopPropagation(); padDown(i, 1); } });
     el.addEventListener("keyup", e => { if (e.key === " " || e.key === "Enter"){ e.stopPropagation(); padUp(i); } });
     el.addEventListener("contextmenu", e => e.preventDefault());
     el.addEventListener("dragover", e => { e.preventDefault(); el.classList.add("drop"); });
     el.addEventListener("dragleave", () => el.classList.remove("drop"));
     el.addEventListener("drop", e => { e.preventDefault(); el.classList.remove("drop"); const f = e.dataTransfer.files[0]; if (f) loadSample(f, i); });
-    padEls[i] = el; wrap.appendChild(el);
+    padEls[i] = el; cell.appendChild(el); wrap.appendChild(cell);
   });
-  refreshPadLabels();
+  refreshPads();
 }
-function refreshPadLabels(){
+function refreshPads(){
   padEls.forEach((el, i) => {
-    el.querySelector(".pname").textContent = padLabel(i);
-    el.querySelector(".smp").textContent = samples[i] ? "Sample" : "";
+    let name = levels16 ? `${padLabel(levelSrc).slice(0, 9)} ${fmtSigned(i - LEVEL_BASE)}` : padLabel(i);
+    if (trackMute && S.mute[i]) name = "Muted";
+    el.querySelector(".pname").textContent = name;
+    el.querySelector(".smp").textContent = !levels16 && samples[i] ? "Sample" : "";
+    el.style.setProperty("--glow", GLOW[PADS[levels16 ? levelSrc : i].g]);
+    el.classList.toggle("sel", !levels16 && i === selected);
+    el.classList.toggle("muted", !levels16 && S.mute[i]);
   });
 }
 
@@ -741,7 +908,7 @@ async function loadSample(file, i){
   try{
     const b = await decode(file);
     samples[i] = {buffer:b, start:0, dur:b.duration, name:shortName(file)};
-    refreshPadLabels(); renderSeq(); selectPad(i);
+    selectPad(i); renderSeq();
     toast(`Loaded “${file.name}” on pad ${i + 1}.`); flashMsg("SAMPLE LOADED");
   }catch{ toast(`Couldn't read “${file.name}”. Try a WAV, MP3 or M4A file.`); }
 }
@@ -749,68 +916,250 @@ async function chopSample(file){
   try{
     const b = await decode(file), seg = b.duration / 8, base = shortName(file).slice(0, 10);
     for (let k = 0; k < 8; k++) samples[8 + k] = {buffer:b, start:k * seg, dur:seg, name:`${base} ${k + 1}`};
-    refreshPadLabels(); renderSeq(); selectPad(8);
-    toast(`Chopped “${file.name}” into 8 slices of ${seg.toFixed(2)} s on pads 9–16.`); flashMsg("CHOPPED 8");
+    selectPad(8); renderSeq();
+    toast(`Chopped “${file.name}” into 8 slices of ${seg.toFixed(2)} s on pads 9–16.`); flashMsg("CHOPPED INTO 8");
   }catch{ toast(`Couldn't read “${file.name}”. Try a WAV, MP3 or M4A file.`); }
 }
 
-// ---------- UI: faders, LCD, transport ----------
-function updateFaders(){
-  const p = S.pad[selected];
-  $("#selName").textContent = `${selected + 1} · ${padLabel(selected)}`;
-  $("#fTune").value = p.tune; $("#oTune").textContent = (p.tune > 0 ? "+" : "") + p.tune + " st";
-  $("#fDecay").value = p.decay; $("#oDecay").textContent = (+p.decay).toFixed(2) + "×";
-  $("#fLevel").value = p.level; $("#oLevel").textContent = Math.round(p.level * 100);
+// ---------- LCD fields, cursor, data wheel, keypad ----------
+function setBpm(v){ S.bpm = clamp(Math.round(v * 10) / 10, 50, 200); updateLcd(); save(); }
+function setPad(k, v){
+  S.pad[selected][k] = v;
+  if (k === "level" && bus[selected]) bus[selected].gain.setTargetAtTime(v, ctx.currentTime, .02);
+  updateLcd(); paintVar(); save();
 }
-function updateMaster(){
-  $("#fCut").value = S.cutoff; $("#oCut").textContent = S.cutoff >= .995 ? "Open" : (cutoffHz(S.cutoff) >= 1000 ? (cutoffHz(S.cutoff) / 1000).toFixed(1) + "k" : Math.round(cutoffHz(S.cutoff)));
-  $("#fRev").value = S.reverb; $("#oRev").textContent = Math.round(S.reverb * 100);
-  $("#swing").value = S.swing; $("#swingOut").textContent = S.swing + "%";
-  $("#bpmRead").textContent = Math.round(S.bpm * 10) / 10;
-  $("#rateBtn").textContent = RATES[S.rate].label;
-  updateLcdTop();
+function setReverb(v){ S.reverb = clamp(Math.round(v * 100) / 100, 0, 1); if (revIn) revIn.gain.setTargetAtTime(S.reverb, ctx.currentTime, .03); updateLcd(); save(); }
+const r2 = v => Math.round(v * 100) / 100;
+const FIELDS = ["seq", "bars", "bpm", "swing", "rate", "pad", "tune", "decay", "level", "reverb"];
+const F = {
+  seq:   {get:() => SEQ_NAMES[queued ?? S.cur], inc:d => selectSeq(((queued ?? S.cur) + d + 4) % 4), num:v => v >= 1 && v <= 4 && selectSeq(v - 1)},
+  bars:  {get:() => String(curPat().bars), inc:d => setBars(d > 0 ? 2 : 1), num:v => (v === 1 || v === 2) && setBars(v)},
+  bpm:   {get:() => S.bpm.toFixed(1).padStart(5, "0"), inc:d => setBpm(S.bpm + d), num:v => setBpm(v)},
+  swing: {get:() => S.swing + "%", inc:d => { S.swing = clamp(S.swing + d, 50, 75); save(); }, num:v => { S.swing = clamp(v, 50, 75); save(); }},
+  rate:  {get:() => RATES[S.rate].label.padEnd(4, " "), inc:d => { S.rate = clamp(S.rate + d, 0, 2); save(); }},
+  pad:   {get:() => String(selected + 1).padStart(2, "0"), inc:d => selectPad((selected + d + 16) % 16), num:v => v >= 1 && v <= 16 && selectPad(v - 1)},
+  tune:  {get:() => fmtSigned(S.pad[selected].tune).padStart(3, " "), inc:d => setPad("tune", clamp(S.pad[selected].tune + d, -12, 12)), num:v => setPad("tune", clamp(v, -12, 12))},
+  decay: {get:() => S.pad[selected].decay.toFixed(2), inc:d => setPad("decay", clamp(r2(S.pad[selected].decay + d * .05), .1, 2)), num:v => setPad("decay", clamp(v / 100, .1, 2))},
+  level: {get:() => String(Math.round(S.pad[selected].level * 100)).padStart(3, " "), inc:d => setPad("level", clamp(r2(S.pad[selected].level + d * .01), 0, 1)), num:v => setPad("level", clamp(v / 100, 0, 1))},
+  reverb:{get:() => String(Math.round(S.reverb * 100)).padStart(3, " "), inc:d => setReverb(S.reverb + d * .01), num:v => setReverb(v / 100)},
+};
+let cur = 2, entry = "", neg = false;
+const fldEls = {};
+document.querySelectorAll(".fld").forEach(b => {
+  fldEls[b.dataset.f] = b;
+  b.addEventListener("click", () => { cur = FIELDS.indexOf(b.dataset.f); cancelEntry(); updateLcd(); });
+});
+function updateLcd(){
+  FIELDS.forEach((f, k) => {
+    const el = fldEls[f];
+    el.classList.toggle("cur", k === cur);
+    el.classList.toggle("edit", k === cur && entry !== "");
+    el.textContent = k === cur && entry !== "" ? (neg ? "-" : "") + entry + "_" : F[f].get();
+  });
+  $("#lcdPadName").textContent = padLabel(selected);
 }
-function updateLcdTop(){
-  const bars = curPat().bars;
-  $("#lcdSeq").textContent = `SEQ:${SEQ_NAMES[S.cur]} ${bars} BAR${bars > 1 ? "S" : ""}`;
-  $("#lcdTempo").textContent = `BPM:${S.bpm.toFixed(1).padStart(5, "0")} SW:${S.swing}%`;
+function dataInc(d){ cancelEntry(); F[FIELDS[cur]].inc(d); updateLcd(); }
+function moveCursor(d){ cancelEntry(); cur = (cur + d + FIELDS.length) % FIELDS.length; updateLcd(); }
+function cancelEntry(){ entry = ""; neg = false; }
+function keypadPress(k){
+  ensureAudio();
+  const f = F[FIELDS[cur]];
+  if (k === "enter"){
+    if (entry !== "" && f.num){ const v = parseInt(entry, 10) * (neg ? -1 : 1); cancelEntry(); f.num(v); }
+    cancelEntry(); updateLcd(); return;
+  }
+  if (!f.num){ flashMsg("TURN THE DATA WHEEL"); return; }
+  if (k === "sign"){ neg = !neg; if (entry === "") entry = "0"; }
+  else if (entry.length < 3) entry = (entry === "0" ? "" : entry) + k;
+  updateLcd();
 }
-function updateLcdPad(){
-  $("#lcdPad").textContent = `PAD ${String(selected + 1).padStart(2, "0")} ${padLabel(selected)}`;
+function buildKeypad(){
+  const pad = $("#keypad");
+  ["7","8","9","4","5","6","1","2","3","sign","0","enter"].forEach(k => {
+    const c = document.createElement("div"); c.className = "ctl";
+    const label = k === "sign" ? "+/−" : k === "enter" ? "Enter" : k;
+    c.innerHTML = `<span class="lbl">${label}</span>`;
+    const b = document.createElement("button");
+    b.className = "cap" + (k === "sign" || k === "enter" ? "" : " blue");
+    b.setAttribute("aria-label", k === "sign" ? "Plus or minus" : k === "enter" ? "Enter" : `Number ${k}`);
+    b.addEventListener("click", () => keypadPress(k));
+    c.appendChild(b); pad.appendChild(c);
+  });
 }
+// data wheel: drag around it, scroll, or arrow keys
+let spinWheel = () => {};
+(() => {
+  const w = $("#wheel"), rotor = $("#rotor");
+  let rot = 0, acc = 0, last = null;
+  const ang = e => { const r = w.getBoundingClientRect(); return Math.atan2(e.clientY - (r.top + r.height / 2), e.clientX - (r.left + r.width / 2)) * 180 / Math.PI; };
+  spinWheel = d => { rot += d; rotor.style.transform = `rotate(${rot}deg)`; };
+  w.addEventListener("pointerdown", e => { e.preventDefault(); last = ang(e); try{ w.setPointerCapture(e.pointerId); }catch{} });
+  w.addEventListener("pointermove", e => {
+    if (last === null) return;
+    const a = ang(e); let d = a - last; if (d > 180) d -= 360; if (d < -180) d += 360; last = a;
+    spinWheel(d); acc += d;
+    while (acc >= 14){ dataInc(1); acc -= 14; }
+    while (acc <= -14){ dataInc(-1); acc += 14; }
+  });
+  const end = () => { last = null; acc = 0; };
+  w.addEventListener("pointerup", end); w.addEventListener("pointercancel", end);
+  w.addEventListener("wheel", e => { e.preventDefault(); const d = e.deltaY < 0 ? 1 : -1; spinWheel(d * 14); dataInc(d); }, {passive:false});
+})();
+
+// ---------- knobs & slider ----------
+function dial(el, get, set, paint, sens = 160){
+  let startY = 0, startV = 0, drag = false;
+  el.addEventListener("pointerdown", e => { e.preventDefault(); drag = true; startY = e.clientY; startV = get(); try{ el.setPointerCapture(e.pointerId); }catch{} });
+  el.addEventListener("pointermove", e => { if (!drag) return; set(clamp(startV + (startY - e.clientY) / sens, 0, 1)); paint(); });
+  const end = () => drag = false;
+  el.addEventListener("pointerup", end); el.addEventListener("pointercancel", end);
+  el.addEventListener("wheel", e => { e.preventDefault(); set(clamp(get() + (e.deltaY < 0 ? .03 : -.03), 0, 1)); paint(); }, {passive:false});
+  el.addEventListener("keydown", e => {
+    const d = {ArrowUp:.02, ArrowRight:.02, ArrowDown:-.02, ArrowLeft:-.02}[e.key];
+    if (d === undefined) return;
+    e.preventDefault(); e.stopPropagation(); set(clamp(get() + d, 0, 1)); paint();
+  });
+  paint();
+}
+const knobPaint = (el, v, txt) => { el.style.setProperty("--rot", (-135 + 270 * v) + "deg"); el.setAttribute("aria-valuenow", Math.round(v * 100)); el.setAttribute("aria-valuetext", txt); };
+const cutTxt = () => S.cutoff >= .995 ? "Open" : Math.round(cutoffHz(S.cutoff)) + " Hz";
+const paintCut = () => knobPaint($("#cutKnob"), S.cutoff, cutTxt());
+const paintVol = () => knobPaint($("#volKnob"), S.volume, Math.round(S.volume * 100) + "%");
+dial($("#cutKnob"), () => S.cutoff, v => { S.cutoff = v; if (filter) filter.frequency.setTargetAtTime(cutoffHz(v), ctx.currentTime, .03); flashMsg("FILTER " + cutTxt().toUpperCase()); save(); }, paintCut);
+dial($("#volKnob"), () => S.volume, v => { S.volume = v; if (master) master.gain.setTargetAtTime(v, ctx.currentTime, .03); flashMsg("MAIN VOLUME " + Math.round(v * 100)); save(); }, paintVol);
+const varGet = () => varParam === "tune" ? (S.pad[selected].tune + 12) / 24 : (S.pad[selected].decay - .1) / 1.9;
+function varSet(v){
+  if (varParam === "tune") setPad("tune", Math.round(v * 24 - 12));
+  else setPad("decay", clamp(r2(Math.round((.1 + v * 1.9) * 20) / 20), .1, 2));
+}
+function paintVar(){
+  const txt = varParam === "tune" ? "TUNE " + fmtSigned(S.pad[selected].tune) : "DCY " + S.pad[selected].decay.toFixed(2);
+  $("#vfader").style.setProperty("--v", varGet());
+  $("#varVal").textContent = txt;
+  $("#vfader").setAttribute("aria-valuetext", txt);
+}
+dial($("#vfader"), varGet, varSet, paintVar, 120);
+$("#afterBtn").addEventListener("click", () => { varParam = varParam === "tune" ? "decay" : "tune"; $("#afterLed").classList.toggle("on", varParam === "decay"); paintVar(); });
+
+// ---------- transport & panel ----------
 let msgTimer = 0;
 function flashMsg(m){
   const el = $("#lcdMsg"); el.textContent = m;
-  clearTimeout(msgTimer); msgTimer = setTimeout(() => el.textContent = "", 1600);
+  clearTimeout(msgTimer); msgTimer = setTimeout(() => el.textContent = " ", 1800);
 }
 function toast(m){ $("#toast").textContent = m; }
+function showNow(p){ $("#lcdNow").textContent = `${String(Math.floor(p / 16) + 1).padStart(3, "0")}.${Math.floor(p % 16 / 4) + 1}.${p % 4 + 1}`; }
 function updateTransport(){
   $("#playLed").classList.toggle("on", playing);
   $("#recLed").classList.toggle("on", recArmed);
-  $("#playBtn").setAttribute("aria-pressed", playing);
+  $("#odLed").classList.toggle("on", recArmed && playing);
+  $("#rptLed").classList.toggle("on", noteRepeat());
+  $("#fullLed").classList.toggle("on", S.fullLevel);
+  $("#lvlLed").classList.toggle("on", levels16);
+  $("#tmLed").classList.toggle("on", trackMute);
   $("#recBtn").setAttribute("aria-pressed", recArmed);
-  $("#rptLed").classList.toggle("on", noteRepeat);
-  $("#rptBtn").setAttribute("aria-pressed", noteRepeat);
-  $("#metroLed").classList.toggle("on", S.metro);
-  $("#metroBtn").setAttribute("aria-pressed", S.metro);
-  $("#lcdMode").textContent = playing ? (recArmed ? "REC" : "PLAY") : (recArmed ? "REC RDY" : "STOP");
+  $("#lcdMode").textContent = playing ? (recArmed ? "REC " : "PLAY") : (recArmed ? "RDY " : "STOP");
+}
+let clearArmed = 0;
+function updateTabs(){
+  $("#tab0").textContent = curPat().bars === 2 ? "BARS:2" : "BARS:1";
+  $("#tab2").textContent = clearArmed ? "SURE?" : "CLEAR";
+  $("#tab3").textContent = S.metro ? "MET:ON" : "MET:OF";
+  $("#tab4").textContent = samples[selected] ? "UNLOAD" : "LOAD";
 }
 function updateSeqButtons(){
-  document.querySelectorAll("#seqBtns [data-seq]").forEach(b => {
-    const n = +b.dataset.seq;
-    b.classList.toggle("sel", n === S.cur);
-    b.classList.toggle("queued", n === queued);
+  document.querySelectorAll("#seqBtns .ctl").forEach((c, n) => {
+    const led = c.querySelector(".led");
+    led.classList.toggle("on", n === S.cur || n === queued);
+    led.classList.toggle("blink", n === queued);
   });
-  $("#barsBtn").textContent = curPat().bars === 2 ? "2 bars" : "1 bar";
+  $("#nextLed").classList.toggle("on", queued !== null);
   $("#seqTitle").textContent = SEQ_NAMES[S.cur];
-  updateLcdTop();
+  updateLcd(); updateTabs();
 }
+const fkActions = [
+  () => setBars(curPat().bars === 2 ? 1 : 2),
+  () => {
+    const empty = p => p.grid.every(r => r.every(v => !v));
+    let target = -1;
+    for (let k = 1; k < 4; k++){ const n = (S.cur + k) % 4; if (empty(S.pats[n])){ target = n; break; } }
+    if (target < 0){ flashMsg("NO EMPTY SEQUENCE"); toast("Every sequence has hits in it. Clear one with F3 first, then copy."); return; }
+    S.pats[target] = copyPat(curPat()); save(); flashMsg(`COPIED TO SEQ ${SEQ_NAMES[target]}`);
+  },
+  () => {
+    if (!clearArmed){ clearArmed = setTimeout(() => { clearArmed = 0; updateTabs(); }, 2500); flashMsg("PRESS F3 AGAIN TO CLEAR"); return; }
+    clearTimeout(clearArmed); clearArmed = 0;
+    pushUndo(); S.pats[S.cur] = {bars:curPat().bars, grid:emptyGrid(), tune:emptyGrid()};
+    renderSeq(); save(); flashMsg(`SEQ ${SEQ_NAMES[S.cur]} CLEARED`);
+  },
+  () => { S.metro = !S.metro; save(); flashMsg(S.metro ? "METRONOME ON" : "METRONOME OFF"); },
+  () => {
+    if (samples[selected]){ samples[selected] = null; selectPad(selected); renderSeq(); flashMsg("SAMPLE UNLOADED"); return; }
+    $("#loadFile").click();
+  },
+  () => $("#chopFile").click(),
+];
+document.querySelectorAll("[data-fk]").forEach(b => b.addEventListener("click", () => { ensureAudio(); fkActions[+b.dataset.fk](); updateTabs(); }));
+
+$("#playBtn").addEventListener("click", () => play(false));
+$("#startBtn").addEventListener("click", () => { if (playing) stop(); play(true); });
+$("#stopBtn").addEventListener("click", stop);
+function toggleRec(){ recArmed = !recArmed; recPassDirty = false; updateTransport(); flashMsg(recArmed ? (playing ? "RECORDING" : "REC ARMED: PRESS PLAY") : "REC OFF"); }
+$("#recBtn").addEventListener("click", toggleRec);
+$("#odBtn").addEventListener("click", () => {
+  if (recArmed && playing){ recArmed = false; updateTransport(); flashMsg("OVERDUB OFF"); return; }
+  recArmed = true; if (!playing) play(true); updateTransport(); flashMsg("OVERDUB");
+});
+$("#undoBtn").addEventListener("click", undo);
+$("#mainBtn").addEventListener("click", () => { cur = 2; cancelEntry(); updateLcd(); flashMsg("MAIN SCREEN"); });
+$("#windowBtn").addEventListener("click", () => $("#seqpanel").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth"}));
+document.querySelectorAll("[data-cur]").forEach(b => b.addEventListener("click", () => {
+  const c = b.dataset.cur;
+  if (c === "left") moveCursor(-1); else if (c === "right") moveCursor(1);
+  else { dataInc(c === "up" ? 1 : -1); spinWheel(c === "up" ? 14 : -14); }
+}));
+
+let taps = [];
+function tap(){
+  const t = performance.now();
+  taps = taps.filter(x => t - x < 2500); taps.push(t);
+  if (taps.length >= 2){ setBpm(60000 / ((taps[taps.length - 1] - taps[0]) / (taps.length - 1))); flashMsg("TAP TEMPO " + Math.round(S.bpm)); }
+  else flashMsg("TAP AGAIN FOR TEMPO");
+  if (taps.length > 5) taps.shift();
+}
+(() => {
+  const b = $("#tapBtn"); let downAt = 0;
+  b.addEventListener("pointerdown", e => { e.preventDefault(); ensureAudio(); rptHold = true; padDuringHold = false; downAt = performance.now(); b.classList.add("pressed"); try{ b.setPointerCapture(e.pointerId); }catch{} updateTransport(); });
+  const end = () => {
+    if (!rptHold) return;
+    rptHold = false; b.classList.remove("pressed"); updateTransport();
+    if (!padDuringHold && performance.now() - downAt < 350) tap();
+  };
+  b.addEventListener("pointerup", end); b.addEventListener("pointercancel", end);
+  b.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); e.stopPropagation(); if (!e.repeat) tap(); } });
+})();
+(() => {
+  const b = $("#eraseBtn");
+  b.addEventListener("pointerdown", e => { e.preventDefault(); eraseHeld = true; b.classList.add("pressed"); try{ b.setPointerCapture(e.pointerId); }catch{} flashMsg("ERASE: TAP A PAD"); });
+  const end = () => { if (!eraseHeld) return; eraseHeld = false; b.classList.remove("pressed"); };
+  b.addEventListener("pointerup", end); b.addEventListener("pointercancel", end);
+})();
+$("#fullBtn").addEventListener("click", () => { S.fullLevel = !S.fullLevel; save(); updateTransport(); flashMsg(S.fullLevel ? "FULL LEVEL ON" : "VELOCITY: HIT HIGH = LOUD"); });
+$("#lvlBtn").addEventListener("click", () => {
+  levels16 = !levels16; if (levels16) levelSrc = selected;
+  refreshPads(); updateTransport(); flashMsg(levels16 ? `16 LEVELS: ${padLabel(levelSrc)}` : "16 LEVELS OFF");
+});
+$("#nextBtn").addEventListener("click", () => { ensureAudio(); selectSeq(((queued ?? S.cur) + 1) % 4); });
+$("#tmBtn").addEventListener("click", () => { trackMute = !trackMute; refreshPads(); updateTransport(); flashMsg(trackMute ? "TRACK MUTE: TAP PADS" : "TRACK MUTE OFF"); });
+document.querySelectorAll("#seqBtns [data-seq]").forEach(b => b.addEventListener("click", () => { ensureAudio(); selectSeq(+b.dataset.seq); }));
+$("#loadFile").addEventListener("change", e => { const f = e.target.files[0]; if (f) loadSample(f, selected); e.target.value = ""; });
+$("#chopFile").addEventListener("change", e => { const f = e.target.files[0]; if (f) chopSample(f); e.target.value = ""; });
 
 // ---------- step grid ----------
 let cells = [], phCol = -1;
 const stepLeds = [];
 function buildStepLeds(){
-  const w = $("#stepLeds");
+  const w = $("#lcdSteps");
   for (let s = 0; s < 16; s++){ const i = document.createElement("i"); if (s % 4 === 0) i.className = "beat"; w.appendChild(i); stepLeds.push(i); }
 }
 function renderSeq(){
@@ -819,9 +1168,8 @@ function renderSeq(){
   grid.textContent = "";
   cells = [];
   const frag = document.createDocumentFragment();
-  // ruler
-  frag.appendChild(Object.assign(document.createElement("div"), {className:"rowhead", style:"cursor:default"}));
-  frag.appendChild(document.createElement("div"));
+  const corner = document.createElement("div"); corner.className = "rowhead"; corner.style.cursor = "default";
+  frag.appendChild(corner); frag.appendChild(document.createElement("div"));
   for (let s = 0; s < len; s++){
     const r = document.createElement("div");
     r.className = "ruler" + (s % 4 === 0 ? " beat" : "");
@@ -831,91 +1179,70 @@ function renderSeq(){
   for (let i = 0; i < 16; i++){
     const glow = GLOW[PADS[i].g];
     const h = document.createElement("button");
-    h.className = "rowhead" + (i === selected ? " sel" : ""); h.dataset.i = i; h.style.setProperty("--glow", glow);
-    h.innerHTML = `<span class="num">${i + 1}</span><span class="dot"></span><span></span>`;
+    h.className = "rowhead" + (i === selected ? " sel" : "") + (S.mute[i] ? " mut" : ""); h.dataset.i = i; h.style.setProperty("--glow", glow);
+    h.innerHTML = `<span class="num">${i + 1}</span><span class="dot"></span><span class="nm"></span>`;
     h.lastChild.textContent = padLabel(i);
     h.addEventListener("click", () => { ensureAudio(); if (!ctx) return; selectPad(i); trigger(i, ctx.currentTime); });
     frag.appendChild(h);
     const m = document.createElement("button");
     m.className = "mute" + (S.mute[i] ? " on" : ""); m.textContent = "M"; m.title = `Mute ${padLabel(i)}`;
     m.setAttribute("aria-pressed", S.mute[i]);
-    m.addEventListener("click", () => { S.mute[i] = !S.mute[i]; renderSeq(); save(); });
+    m.addEventListener("click", () => { S.mute[i] = !S.mute[i]; renderSeq(); refreshPads(); save(); });
     frag.appendChild(m);
     cells[i] = [];
     for (let s = 0; s < len; s++){
       const c = document.createElement("button");
-      c.className = "cell" + (s % 4 === 0 ? " b4" : "") + (s === 16 ? " bar2" : "") + (pat.grid[i][s] ? " on" : "");
+      c.className = "cell" + (s % 4 === 0 ? " b4" : "") + (s === 16 ? " bar2" : "") + (S.mute[i] ? " mut" : "");
       c.dataset.i = i; c.dataset.s = s; c.style.setProperty("--glow", glow);
       c.setAttribute("aria-label", `${padLabel(i)}, step ${s + 1}`);
       cells[i][s] = c; frag.appendChild(c);
     }
   }
   grid.appendChild(frag);
-  grid.querySelectorAll(".rowhead[data-i]").forEach(h => { if (S.mute[+h.dataset.i]) h.style.opacity = .5; });
-  for (let i = 0; i < 16; i++) if (S.mute[i]) cells[i].forEach(c => c.style.opacity = .45);
+  for (let i = 0; i < 16; i++) for (let s = 0; s < len; s++) paintCell(i, s);
   phCol = -1;
   updateSeqButtons();
 }
 function paintCell(i, s){
   const c = cells[i] && cells[i][s]; if (!c) return;
-  c.classList.toggle("on", !!curPat().grid[i][s]);
+  const v = curPat().grid[i][s], off = curPat().tune[i][s];
+  c.classList.toggle("on", !!v);
+  c.style.opacity = v ? .35 + .65 * v : "";
+  c.textContent = v && off ? (off > 0 ? "+" + off : off) : "";
 }
 function setPlayhead(pos){
   if (phCol >= 0) for (let i = 0; i < 16; i++){ const c = cells[i] && cells[i][phCol]; if (c) c.classList.remove("ph"); }
-  stepLeds.forEach(l => l.classList.remove("on", "rec"));
+  stepLeds.forEach(l => l.classList.remove("on"));
   phCol = pos;
   if (pos < 0) return;
   for (let i = 0; i < 16; i++){ const c = cells[i] && cells[i][pos]; if (c) c.classList.add("ph"); }
-  const led = stepLeds[pos % 16]; led.classList.add("on"); if (recArmed) led.classList.add("rec");
+  stepLeds[pos % 16].classList.add("on");
 }
-// click / drag painting
 let paint = null;
 $("#grid").addEventListener("pointerdown", e => {
   const c = e.target.closest(".cell"); if (!c) return;
   e.preventDefault();
-  const i = +c.dataset.i, s = +c.dataset.s, g = curPat().grid;
+  const i = +c.dataset.i, s = +c.dataset.s, pat = curPat();
   pushUndo();
-  paint = g[i][s] ? 0 : 1;
-  g[i][s] = paint; paintCell(i, s); save();
+  paint = pat.grid[i][s] ? 0 : 1;
+  pat.grid[i][s] = paint; pat.tune[i][s] = 0; paintCell(i, s); save();
   if (paint){ ensureAudio(); if (ctx && !playing) trigger(i, ctx.currentTime); }
 });
 $("#grid").addEventListener("pointerover", e => {
   if (paint === null) return;
   const c = e.target.closest(".cell"); if (!c) return;
-  const i = +c.dataset.i, s = +c.dataset.s;
-  curPat().grid[i][s] = paint; paintCell(i, s); save();
+  const i = +c.dataset.i, s = +c.dataset.s, pat = curPat();
+  pat.grid[i][s] = paint; pat.tune[i][s] = 0; paintCell(i, s); save();
 });
 window.addEventListener("pointerup", () => paint = null);
 $("#grid").addEventListener("keydown", e => {
   const c = e.target.closest(".cell"); if (!c || (e.key !== "Enter" && e.key !== " ")) return;
   e.preventDefault(); e.stopPropagation();
-  const i = +c.dataset.i, s = +c.dataset.s, g = curPat().grid;
-  pushUndo(); g[i][s] = g[i][s] ? 0 : 1; paintCell(i, s); save();
+  const i = +c.dataset.i, s = +c.dataset.s, pat = curPat();
+  pushUndo(); pat.grid[i][s] = pat.grid[i][s] ? 0 : 1; pat.tune[i][s] = 0; paintCell(i, s); save();
 });
 
-// ---------- animation frame: pad glow, playhead, scope ----------
-const scope = $("#scope"), sctx = scope.getContext("2d");
-let scopeData = null;
-function drawScope(){
-  const w = scope.width, h = scope.height;
-  sctx.clearRect(0, 0, w, h);
-  sctx.strokeStyle = "#1d2912"; sctx.lineWidth = 3; sctx.lineJoin = "round";
-  sctx.beginPath();
-  if (analyser){
-    if (!scopeData) scopeData = new Uint8Array(analyser.fftSize);
-    analyser.getByteTimeDomainData(scopeData);
-    // start at a rising zero crossing so the wave stands still
-    let start = 0;
-    for (let i = 1; i < scopeData.length / 2; i++) if (scopeData[i - 1] < 128 && scopeData[i] >= 128){ start = i; break; }
-    const n = 600;
-    for (let x = 0; x < n; x++){
-      const v = (scopeData[start + x] - 128) / 128;
-      const y = h / 2 - v * (h / 2 - 4) * 1.6;
-      x ? sctx.lineTo(x * w / n, y) : sctx.moveTo(0, y);
-    }
-  }else{ sctx.moveTo(0, h / 2); sctx.lineTo(w, h / 2); }
-  sctx.stroke();
-}
+// ---------- animation frame: pad glow, playhead ----------
 function frame(){
   const now = ctx.currentTime;
   for (let k = visQ.length - 1; k >= 0; k--){
@@ -929,97 +1256,31 @@ function frame(){
   while (stepQ.length && stepQ[0].t <= now) latest = stepQ.shift();
   if (latest && playing){
     if (latest.seq === S.cur) setPlayhead(latest.pos);
-    const p = latest.pos;
-    $("#lcdNow").textContent = `NOW:${String(Math.floor(p / 16) + 1).padStart(3, "0")}.${Math.floor(p % 16 / 4) + 1}.${p % 4 + 1}`;
+    showNow(latest.pos);
   }
-  drawScope();
   requestAnimationFrame(frame);
 }
 
-// ---------- controls ----------
-$("#playBtn").addEventListener("click", () => playing ? stop() : play());
-$("#stopBtn").addEventListener("click", stop);
-$("#recBtn").addEventListener("click", toggleRec);
-function toggleRec(){ recArmed = !recArmed; recPassDirty = false; updateTransport(); flashMsg(recArmed ? (playing ? "RECORDING" : "PRESS PLAY") : "REC OFF"); }
-function toggleRepeat(){ noteRepeat = !noteRepeat; updateTransport(); flashMsg(noteRepeat ? "NOTE RPT " + RATES[S.rate].label : "NOTE RPT OFF"); }
-$("#rptBtn").addEventListener("click", toggleRepeat);
-$("#rateBtn").addEventListener("click", () => { S.rate = (S.rate + 1) % RATES.length; updateMaster(); save(); flashMsg("RATE " + RATES[S.rate].label); });
-$("#metroBtn").addEventListener("click", () => { S.metro = !S.metro; updateTransport(); save(); });
-$("#undoBtn").addEventListener("click", undo);
-let clearArmed = 0;
-$("#clearBtn").addEventListener("click", e => {
-  const b = e.currentTarget;
-  if (!clearArmed){
-    b.textContent = "Tap to confirm"; clearArmed = setTimeout(() => { b.textContent = "Clear seq"; clearArmed = 0; }, 2500); return;
-  }
-  clearTimeout(clearArmed); clearArmed = 0; b.textContent = "Clear seq";
-  pushUndo(); curPat().grid = emptyGrid(); renderSeq(); save(); flashMsg(`SEQ ${SEQ_NAMES[S.cur]} CLEARED`);
-});
-document.querySelectorAll("#seqBtns [data-seq]").forEach(b => b.addEventListener("click", () => {
-  const n = +b.dataset.seq;
-  if (playing && n !== S.cur){ queued = n; updateSeqButtons(); flashMsg(`NEXT: SEQ ${SEQ_NAMES[n]}`); return; }
-  queued = null; S.cur = n; renderSeq(); save();
-}));
-$("#barsBtn").addEventListener("click", () => {
-  const p = curPat(); pushUndo();
-  if (p.bars === 1){
-    const bar2Empty = p.grid.every(r => r.slice(16).every(v => !v));
-    if (bar2Empty) p.grid.forEach(r => { for (let s = 0; s < 16; s++) r[s + 16] = r[s]; });
-    p.bars = 2;
-  }else p.bars = 1;
-  renderSeq(); save();
-});
-$("#copyBtn").addEventListener("click", () => {
-  const isEmpty = p => p.grid.every(r => r.every(v => !v));
-  let target = -1;
-  for (let k = 1; k < 4; k++){ const n = (S.cur + k) % 4; if (isEmpty(S.pats[n])){ target = n; break; } }
-  if (target < 0){ flashMsg("NO EMPTY SEQ"); toast("Every sequence has hits in it. Clear one first, then copy."); return; }
-  S.pats[target] = {bars:curPat().bars, grid:curPat().grid.map(r => r.slice())};
-  save(); flashMsg(`COPIED TO ${SEQ_NAMES[target]}`); toast(`Copied sequence ${SEQ_NAMES[S.cur]} into ${SEQ_NAMES[target]}.`);
-});
-function setBpm(v){ S.bpm = Math.min(200, Math.max(50, Math.round(v * 10) / 10)); updateMaster(); save(); }
-$("#bpmDown").addEventListener("click", () => setBpm(Math.round(S.bpm) - 1));
-$("#bpmUp").addEventListener("click", () => setBpm(Math.round(S.bpm) + 1));
-let taps = [];
-$("#tapBtn").addEventListener("click", () => {
-  const t = performance.now();
-  taps = taps.filter(x => t - x < 2500); taps.push(t);
-  if (taps.length >= 2){
-    const iv = (taps[taps.length - 1] - taps[0]) / (taps.length - 1);
-    setBpm(60000 / iv); flashMsg("TAP " + Math.round(S.bpm));
-  }
-  if (taps.length > 5) taps.shift();
-});
-$("#swing").addEventListener("input", e => { S.swing = +e.target.value; updateMaster(); save(); });
-$("#fTune").addEventListener("input", e => { S.pad[selected].tune = +e.target.value; updateFaders(); save(); });
-$("#fDecay").addEventListener("input", e => { S.pad[selected].decay = +e.target.value; updateFaders(); save(); });
-$("#fLevel").addEventListener("input", e => { S.pad[selected].level = +e.target.value; if (bus[selected]) bus[selected].gain.setTargetAtTime(S.pad[selected].level, ctx.currentTime, .02); updateFaders(); save(); });
-$("#fCut").addEventListener("input", e => { S.cutoff = +e.target.value; if (filter) filter.frequency.setTargetAtTime(cutoffHz(S.cutoff), ctx.currentTime, .03); updateMaster(); save(); });
-$("#fRev").addEventListener("input", e => { S.reverb = +e.target.value; if (revIn) revIn.gain.setTargetAtTime(S.reverb, ctx.currentTime, .03); updateMaster(); save(); });
-$("#loadBtn").addEventListener("click", () => $("#loadFile").click());
-$("#chopBtn").addEventListener("click", () => $("#chopFile").click());
-$("#loadFile").addEventListener("change", e => { const f = e.target.files[0]; if (f) loadSample(f, selected); e.target.value = ""; });
-$("#chopFile").addEventListener("change", e => { const f = e.target.files[0]; if (f) chopSample(f); e.target.value = ""; });
-$("#resetPadBtn").addEventListener("click", () => {
-  samples[selected] = null; S.pad[selected] = {tune:0, decay:1, level:.8};
-  if (bus[selected]) bus[selected].gain.setTargetAtTime(.8, ctx.currentTime, .02);
-  refreshPadLabels(); renderSeq(); updateFaders(); updateLcdPad(); save(); flashMsg("PAD RESET");
-});
-
-// keyboard
-document.addEventListener("pointerdown", e => { if (e.target.closest(".hw, .mute, .rowhead")) e.preventDefault(); });
-const typing = e => /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) && e.target.type !== "range";
+// ---------- keyboard ----------
+// mouse clicks on hardware buttons shouldn't take focus, so Space and Enter stay with the instrument
+document.addEventListener("pointerdown", e => { if (e.target.closest(".cap, .mute, .rowhead, .fld")) e.preventDefault(); });
 window.addEventListener("keydown", e => {
-  if (typing(e) || e.metaKey && e.key !== "z" || e.altKey) return;
+  if (e.altKey || e.metaKey && e.key.toLowerCase() !== "z") return;
   const k = e.key.toLowerCase();
   if ((e.ctrlKey || e.metaKey) && k === "z"){ e.preventDefault(); undo(); return; }
   if (e.ctrlKey) return;
-  if (k in KEYMAP){ e.preventDefault(); if (!e.repeat) padDown(KEYMAP[k]); return; }
+  if (k in KEYMAP){ e.preventDefault(); if (!e.repeat) padDown(KEYMAP[k], S.fullLevel ? 1 : .7); return; }
+  if (k === "arrowleft" || k === "arrowright"){ e.preventDefault(); moveCursor(k === "arrowright" ? 1 : -1); return; }
+  if (k === "arrowup" || k === "arrowdown"){ e.preventDefault(); dataInc(k === "arrowup" ? 1 : -1); spinWheel(k === "arrowup" ? 14 : -14); return; }
   if (e.repeat) return;
-  if (k === " "){ e.preventDefault(); playing ? stop() : play(); }
-  else if (k === "enter" && !e.target.closest("button")){ e.preventDefault(); toggleRec(); }
-  else if (k === "n") toggleRepeat();
-  else if (k === "m"){ S.metro = !S.metro; updateTransport(); save(); }
+  const onButton = e.target.closest && e.target.closest("button, [role=slider]");
+  if (k === " " && !onButton){ e.preventDefault(); playing ? stop() : play(true); }
+  else if (k === " "){ e.preventDefault(); if (e.target.click) e.target.click(); }
+  else if (k === "enter" && !onButton){ e.preventDefault(); entry !== "" ? keypadPress("enter") : toggleRec(); }
+  else if (k === "escape"){ cancelEntry(); updateLcd(); }
+  else if (k === "n"){ ensureAudio(); rptLatch = !rptLatch; updateTransport(); flashMsg(rptLatch ? "NOTE REPEAT " + RATES[S.rate].label : "NOTE REPEAT OFF"); }
+  else if (k === "t"){ ensureAudio(); tap(); }
+  else if (k === "m"){ S.metro = !S.metro; save(); updateTabs(); flashMsg(S.metro ? "METRONOME ON" : "METRONOME OFF"); }
   else if (k === "[") setBpm(Math.round(S.bpm) - 1);
   else if (k === "]") setBpm(Math.round(S.bpm) + 1);
 });
@@ -1027,17 +1288,16 @@ window.addEventListener("keyup", e => {
   const k = e.key.toLowerCase();
   if (k in KEYMAP) padUp(KEYMAP[k]);
 });
-window.addEventListener("blur", () => [...held].forEach(padUp));
+window.addEventListener("blur", () => { [...held.keys()].forEach(padUp); rptHold = false; eraseHeld = false; updateTransport(); });
 
 // ---------- boot ----------
 buildStepLeds();
+buildKeypad();
 buildPads();
 renderSeq();
-updateMaster();
-updateFaders();
-updateLcdPad();
+updateLcd();
 updateTransport();
-drawScope();
+paintVar();
 })();
 </script>
 

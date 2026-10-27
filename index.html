@@ -352,7 +352,9 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
 .view3d{position:relative;height:min(calc(100vh - 110px),800px);min-height:340px;margin-inline:calc(-1 * min(60px,max(0px,calc((100vw - 100%) / 2 - 14px))));cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 .view3d.hover{cursor:pointer}
 .view3d.dragging{cursor:grabbing}
-.view3d canvas{display:block;width:100%;height:100%}
+.view3d canvas{display:block;width:100%;height:100%;outline:none}
+.view3d canvas:focus-visible{outline:2px solid var(--rose);outline-offset:-2px}
+.wrap:focus{outline:none}
 .dom-machine{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 .dom-machine.fallback{position:static;width:auto;height:auto;overflow:visible;clip-path:none;white-space:normal}
 @media (max-width:700px){.view3d{height:min(118vw,calc(100vh - 150px))}}
@@ -401,7 +403,7 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
 </style>
 </head>
 <body>
-<main class="wrap">
+<main class="wrap" tabindex="-1">
   <header class="intro">
     <h1>MPC 2000XL</h1>
     <div class="viewbar" role="group" aria-label="View and lessons">
@@ -415,7 +417,7 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
     </div>
   </header>
 
-  <div class="view3d" id="view3d"><canvas id="c3d" aria-label="3D model of the sampler. Every control is also reachable from the keyboard."></canvas></div>
+  <div class="view3d" id="view3d"><canvas id="c3d" tabindex="0" aria-label="3D model of the sampler. Every control is also reachable from the keyboard."></canvas></div>
   <div class="dom-machine" id="domMachine">
   <section class="unit" aria-label="MPC 2000XL">
     <div class="face front" aria-hidden="true"><span class="fronttxt">AKAI professional</span><span class="floppy"></span><span class="fled"></span><span class="fdesc">3.5" HD floppy · 1.44 MB</span></div>
@@ -1483,6 +1485,13 @@ function frame(){
 
 // ---------- keyboard ----------
 // mouse clicks on hardware buttons shouldn't take focus, so Space and Enter stay with the instrument
+// The pointer handlers cancel the browser's own focus change, so claim keyboard focus here; inside the
+// artifact frame, keys only reach this page once something in it has focus.
+document.addEventListener("pointerdown", e => {
+  if (e.target.closest("input, textarea, select, a[href], .viewbar button, .coach button")) return;
+  const t = e.target.closest("#c3d") || $(".wrap");
+  if (document.activeElement !== t) t.focus({preventScroll:true});
+}, true);
 document.addEventListener("pointerdown", e => { if (e.target.closest(".cap, .mute, .rowhead, .fld")) e.preventDefault(); });
 window.addEventListener("keydown", e => {
   if (e.altKey || e.metaKey && e.key.toLowerCase() !== "z") return;

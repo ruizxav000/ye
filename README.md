@@ -1,12 +1,12 @@
-# Fantasy 16
+# MPC 2000XL
 
-A browser sampler styled after the Akai MPC 2000XL: a light grey body, a teal pad
-field, an LCD with F1–F6 soft keys, a data wheel, a number keypad and the classic
-transport. It has a synthesized kit (808 kick and boom, snare, clap, hats, keys,
+A 3D browser recreation of the Akai MPC 2000XL. Drag around it to turn it, or use the Studio / Low angle / Top down views. It has a synthesized kit (808 kick and boom, snare, clap, hats, keys,
 choir, brass, orchestra hit and more), live loop recording quantized to 16th notes,
 note repeat, swing, four sequences, a step editor, and sample loading and chopping.
 
 Open `index.html` in a browser. There's no build step and nothing to install.
+
+**New to it?** Press **Lessons** above the machine. Six short lessons point at each control and wait for you to use it: the pads, playing loops, recording a beat, editing on the screen, note repeat and 16 Levels, and chopping a sample.
 
 ## Pads
 

@@ -348,6 +348,15 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
 .bscrew::after{content:"";position:absolute;left:2px;right:2px;top:5px;height:2px;background:#5d6166;transform:rotate(40deg)}
 .bscrew.a{left:1.2%;top:10%}.bscrew.b{right:1.2%;top:10%}.bscrew.c{left:1.2%;bottom:10%}.bscrew.d{right:1.2%;bottom:10%}
 
+/* ---------- 3D view ---------- */
+.view3d{position:relative;height:min(calc(100vh - 110px),800px);min-height:340px;margin-inline:calc(-1 * min(60px,max(0px,calc((100vw - 100%) / 2 - 14px))));cursor:grab;touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.view3d.hover{cursor:pointer}
+.view3d.dragging{cursor:grabbing}
+.view3d canvas{display:block;width:100%;height:100%}
+.dom-machine{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.dom-machine.fallback{position:static;width:auto;height:auto;overflow:visible;clip-path:none;white-space:normal}
+@media (max-width:700px){.view3d{height:min(118vw,calc(100vh - 150px))}}
+
 /* ---------- lessons ---------- */
 .viewbar .teach{margin-left:18px;padding-left:18px;border-left:1px solid rgba(59,34,51,.3);font-family:var(--f-serif);font-style:italic;font-size:21px;font-weight:600;color:var(--sky-ink);line-height:1}
 .viewbar .teach::after{content:" →"}
@@ -398,16 +407,16 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
     <div class="viewbar" role="group" aria-label="View and lessons">
       <span class="vlabel">View</span>
       <button data-view="three" aria-pressed="true">Three-quarter</button>
-      <button data-view="front">Front</button>
-      <button data-view="top">Top down</button>
+      <button data-view="play">Play</button>
+      <button data-view="pads">Pads</button>
       <button data-view="back">Back</button>
       <button class="teach" id="teachBtn">Lessons</button>
-      <span class="vhint">Drag anywhere around the machine to spin it.</span>
+      <span class="vhint">Drag around the machine to spin it. Pads zooms in for playing.</span>
     </div>
   </header>
 
-  <div class="stage" id="stage">
-    <div class="shadowrig" aria-hidden="true"><div class="floatshadow"></div></div>
+  <div class="view3d" id="view3d"><canvas id="c3d" aria-label="3D model of the sampler. Every control is also reachable from the keyboard."></canvas></div>
+  <div class="dom-machine" id="domMachine">
   <section class="unit" aria-label="MPC 2000XL">
     <div class="face front" aria-hidden="true"><span class="fronttxt">AKAI professional</span><span class="floppy"></span><span class="fled"></span><span class="fdesc">3.5" HD floppy · 1.44 MB</span></div>
     <div class="face back" aria-hidden="true">
@@ -589,6 +598,7 @@ kbd{font-family:var(--f-body);font-weight:700;font-size:.8em;border:1px solid co
   </aside>
 </main>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
 (() => {
 "use strict";
@@ -666,7 +676,7 @@ const noteRepeat = () => rptLatch || rptHold;
 const held = new Map(); // physical pad -> velocity
 const samples = new Array(16).fill(null);
 const undoStack = [];
-let coach = null;
+let coach = null, m3 = null;  // m3: the 3D view, once it exists
 const emit = (type, d = {}) => { if (coach) coach.on(type, d); };
 
 // ---------- audio graph ----------
@@ -1018,6 +1028,7 @@ const padEls = [];
 function padDown(i, vel){
   ensureAudio(); if (!ctx) return;
   padEls[i].classList.add("down");
+  if (m3) m3.hold(i, true);
   if (rptHold) padDuringHold = true;
   if (trackMute){
     S.mute[i] = !S.mute[i]; refreshPads(); renderSeq(); save();
@@ -1039,6 +1050,7 @@ function padDown(i, vel){
 function padUp(i){
   held.delete(i);
   padEls[i].classList.remove("down");
+  if (m3) m3.hold(i, false);
 }
 function selectPad(i){
   selected = i;
@@ -1089,6 +1101,7 @@ function refreshPads(){
     el.classList.toggle("sel", !levels16 && i === selected);
     el.classList.toggle("muted", !levels16 && S.mute[i]);
   });
+  if (m3) m3.padsChanged();
 }
 
 // ---------- samples ----------
@@ -1223,8 +1236,10 @@ const knobPaint = (el, v, txt) => { el.style.setProperty("--rot", (-135 + 270 * 
 const cutTxt = () => S.cutoff >= .995 ? "Open" : Math.round(cutoffHz(S.cutoff)) + " Hz";
 const paintCut = () => knobPaint($("#cutKnob"), S.cutoff, cutTxt());
 const paintVol = () => knobPaint($("#volKnob"), S.volume, Math.round(S.volume * 100) + "%");
-dial($("#cutKnob"), () => S.cutoff, v => { S.cutoff = v; if (filter) filter.frequency.setTargetAtTime(cutoffHz(v), ctx.currentTime, .03); flashMsg("FILTER " + cutTxt().toUpperCase()); save(); emit("knob", {name:"cut"}); }, paintCut);
-dial($("#volKnob"), () => S.volume, v => { S.volume = v; if (master) master.gain.setTargetAtTime(v, ctx.currentTime, .03); flashMsg("MAIN VOLUME " + Math.round(v * 100)); save(); emit("knob", {name:"vol"}); }, paintVol);
+const setCut = v => { S.cutoff = v; if (filter) filter.frequency.setTargetAtTime(cutoffHz(v), ctx.currentTime, .03); flashMsg("FILTER " + cutTxt().toUpperCase()); save(); emit("knob", {name:"cut"}); };
+dial($("#cutKnob"), () => S.cutoff, setCut, paintCut);
+const setVol = v => { S.volume = v; if (master) master.gain.setTargetAtTime(v, ctx.currentTime, .03); flashMsg("MAIN VOLUME " + Math.round(v * 100)); save(); emit("knob", {name:"vol"}); };
+dial($("#volKnob"), () => S.volume, setVol, paintVol);
 const varGet = () => varParam === "tune" ? (S.pad[selected].tune + 12) / 24 : (S.pad[selected].decay - .1) / 1.9;
 function varSet(v){
   if (varParam === "tune") setPad("tune", Math.round(v * 24 - 12));
@@ -1453,7 +1468,7 @@ function frame(){
   for (let k = visQ.length - 1; k >= 0; k--){
     if (visQ[k].t <= now){
       const el = padEls[visQ[k].i];
-      el.classList.remove("hit"); void el.offsetWidth; el.classList.add("hit");
+      el.classList.remove("hit"); void el.offsetWidth; el.classList.add("hit"); if (m3) m3.flash(visQ[k].i);
       visQ.splice(k, 1);
     }
   }
@@ -1545,7 +1560,7 @@ coach = (() => {
   const KEY = STORE + "-lessons";
   let L = -1, k = 0, count = 0, busy = false, doneList = [];
   try{ doneList = JSON.parse(localStorage.getItem(KEY)) || []; }catch{}
-  const clear = () => document.querySelectorAll(".coach-target").forEach(e => e.classList.remove("coach-target"));
+  const clear = () => { document.querySelectorAll(".coach-target").forEach(e => e.classList.remove("coach-target")); if (m3) m3.highlight([]); };
   function bindLessonButtons(){
     body.querySelectorAll("[data-l]").forEach(b => b.addEventListener("click", () => start(+b.dataset.l)));
     body.querySelectorAll("[data-pick]").forEach(b => b.addEventListener("click", picker));
@@ -1556,7 +1571,7 @@ coach = (() => {
       `<li><button data-l="${n}"><span class="n${doneList.includes(n) ? " ok" : ""}">${doneList.includes(n) ? "✓" : n + 1}</span><span><b>${l.title}</b><small>${l.blurb}</small></span></button></li>`).join("")}</ol>`;
     bindLessonButtons();
   }
-  function start(n){ L = n; k = 0; if (view !== "front") setView("front"); show(); }
+  function start(n){ L = n; k = 0; setView("play"); show(); }
   function show(){
     const les = LESSONS[L], step = les.steps[k], last = k === les.steps.length - 1;
     count = 0; busy = false; clear();
@@ -1568,16 +1583,18 @@ coach = (() => {
     $("#ccNext").textContent = last ? "Finish" : step.optional ? "Next" : "Skip step";
     const t = step.target(), list = (Array.isArray(t) ? t : [t]).filter(Boolean);
     list.forEach(e => e.classList.add("coach-target"));
+    if (m3) m3.highlight(list);
     if (list[0]) reveal(list[0]);
   }
   function reveal(el){
-    const r = el.getBoundingClientRect();
-    if (r.top < 40 || r.bottom > innerHeight - 40) el.scrollIntoView({block:"center", behavior:reduceMotion.matches ? "auto" : "smooth"});
+    const rectOf = () => (m3 && m3.rectFor(el)) || el.getBoundingClientRect();
+    const scroller = m3 && m3.rectFor(el) ? $("#view3d") : el, r = rectOf();
+    if (r.top < 40 || r.bottom > innerHeight - 40) scroller.scrollIntoView({block:"center", behavior:reduceMotion.matches ? "auto" : "smooth"});
     setTimeout(() => {
       card.classList.remove("flip");
-      const a = el.getBoundingClientRect(), c = card.getBoundingClientRect();
+      const a = rectOf(), c = card.getBoundingClientRect();
       if (a.right > c.left && a.left < c.right && a.bottom > c.top && a.top < c.bottom) card.classList.add("flip");
-    }, reduceMotion.matches ? 0 : 450);
+    }, reduceMotion.matches ? 0 : 800);
   }
   function next(){ if (k < LESSONS[L].steps.length - 1){ k++; show(); } else finish(); }
   function finish(){
@@ -1621,77 +1638,707 @@ function extrude(){
     }
   });
 }
-const unit = $(".unit"), stage = $("#stage"), rig = $(".shadowrig");
-const VIEWS = {three:{x:40, z:22}, front:{x:30, z:0}, top:{x:0, z:0}, back:{x:34, z:180}};
-const FILL = .86;
+// ---------- 3D machine: three.js draws it, the hidden DOM controls stay the source of truth ----------
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)");
-const EASE = "cubic-bezier(.2,.7,.2,1)";
-let rx = 0, rz = 0, view = "three";
-function pose(x, z, s, mt, mb){
-  stage.style.setProperty("--rx", x + "deg"); stage.style.setProperty("--rz", z + "deg"); stage.style.setProperty("--sc", s.toFixed(3));
-  unit.style.marginTop = mt.toFixed(1) + "px"; unit.style.marginBottom = mb.toFixed(1) + "px";
-  // the floating shadow lives in its own layer, matched to the machine's box
-  rig.style.top = unit.offsetTop + "px"; rig.style.left = unit.offsetLeft + "px";
-  rig.style.width = unit.offsetWidth + "px"; rig.style.height = unit.offsetHeight + "px";
-}
-// Try the pose, measure where it lands, and fit it to the window. This runs in one task, so nothing paints in between.
-function solve(x, z){
-  pose(x, z, 1, 0, 0);
-  const r0 = unit.getBoundingClientRect(), availW = stage.getBoundingClientRect().width - 24;
-  const s = clamp(Math.min(Math.max(300, innerHeight - 120) * FILL / r0.height, availW / r0.width), .2, 1);
-  let mt = 0, mb = 0;
-  for (let n = 0; n < 3; n++){
-    pose(x, z, s, mt, mb);
-    const sr = stage.getBoundingClientRect(), top0 = sr.top + parseFloat(getComputedStyle(stage).paddingTop) + mt;
-    const r = unit.getBoundingClientRect(), h = unit.offsetHeight;
-    mt = 10 - (r.top - top0); mb = (r.bottom - top0) + 20 + 110 * s - h; // room below for the floating shadow
-  }
-  return {s, mt, mb};
-}
-function go(x, z, animate){
-  x = clamp(x, 0, 70);
-  const keep = [stage.style.getPropertyValue("--rx"), stage.style.getPropertyValue("--rz"), stage.style.getPropertyValue("--sc"), unit.style.marginTop, unit.style.marginBottom, rig.style.top];
-  unit.style.transition = rig.style.transition = "none";
-  const t = solve(x, z);
-  rx = x; rz = z;
-  if (animate && !reduceMotion.matches){
-    stage.style.setProperty("--rx", keep[0]); stage.style.setProperty("--rz", keep[1]); stage.style.setProperty("--sc", keep[2]);
-    unit.style.marginTop = keep[3]; unit.style.marginBottom = keep[4]; rig.style.top = keep[5];
-    void unit.offsetWidth;
-    unit.style.transition = `transform .8s ${EASE}, margin .8s ${EASE}`;
-    rig.style.transition = `transform .8s ${EASE}, top .8s ${EASE}`;
-    pose(x, z, t.s, t.mt, t.mb);
-  }
-}
+const BRAND = {o:"MPC", s:"2000XL", sub:"MIDI PRODUCTION CENTER", front:"AKAI professional", model:"MODEL NUMBER MPC2000XL"};
+let pendingView = "three";
 function setView(name, animate = true){
-  view = name;
-  const v = VIEWS[name];
-  go(v.x, v.z + 360 * Math.round((rz - v.z) / 360), animate); // take the short way round
+  if (m3) m3.setView(name, animate); else pendingView = name;
   emit("view", {name});
   document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === name));
 }
 document.querySelectorAll("[data-view]").forEach(b => b.addEventListener("click", () => setView(b.dataset.view)));
-let resizeT = 0;
-addEventListener("resize", () => { clearTimeout(resizeT); resizeT = setTimeout(() => go(rx, rz, false), 120); });
-function measureBezel(){ stage.style.setProperty("--bh", $(".bezel").offsetHeight + "px"); }
-if (document.fonts) document.fonts.ready.then(() => { measureBezel(); go(rx, rz, false); });
-(() => {
-  let sx = 0, sy = 0, x0 = 0, z0 = 0, id = null;
-  stage.addEventListener("pointerdown", e => {
-    if (e.button !== 0 || e.target.closest("button, input, [role=slider], .pad, .fld")) return;
-    id = e.pointerId; sx = e.clientX; sy = e.clientY; x0 = rx; z0 = rz;
-    try{ stage.setPointerCapture(id); }catch{}
-    stage.classList.add("dragging");
-    document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", "false"));
+
+function init3D(){
+  const host = $("#view3d"), canvas = $("#c3d");
+  let renderer = null;
+  try{ if (window.THREE) renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true}); }catch{}
+  if (!renderer){ host.hidden = true; $("#domMachine").classList.add("fallback"); return; }
+  const T = THREE, small = matchMedia("(max-width:700px)").matches;
+  renderer.setPixelRatio(Math.min(devicePixelRatio || 1, small ? 1.6 : 2));
+  renderer.outputEncoding = T.sRGBEncoding;
+  renderer.toneMapping = T.ACESFilmicToneMapping; renderer.toneMappingExposure = .8;
+  renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap;
+  renderer.setClearColor(0x000000, 0);
+  const scene = new T.Scene(), camera = new T.PerspectiveCamera(28, 1, 10, 8000);
+  const aniso = renderer.capabilities.getMaxAnisotropy();
+
+  // Real proportions in millimetres: 408 wide, 375 deep, 86 tall. Panel coordinates run from the back-left corner.
+  const W = 408, D = 375, H = 86, BS = 3;
+  const at = (px, py, y = H) => new T.Vector3(px - W / 2, y, py - D / 2);
+  const mat = (color, roughness = .5, metalness = 0, extra = {}) => new T.MeshStandardMaterial(Object.assign({color, roughness, metalness}, extra));
+  const shadowy = (...ms) => ms.forEach(m => { m.castShadow = true; m.receiveShadow = true; });
+  const canvasTex = cv => { const t = new T.CanvasTexture(cv); t.encoding = T.sRGBEncoding; t.anisotropy = aniso; return t; };
+
+  // soft dusk room for reflections on metal and gloss
+  {
+    const env = new T.Scene(), g = new T.SphereGeometry(500, 32, 16), pos = g.attributes.position, cols = [];
+    const top = new T.Color(0x9c8380), bot = new T.Color(0x22151f);
+    for (let i = 0; i < pos.count; i++){ const c = bot.clone().lerp(top, (pos.getY(i) / 500 + 1) / 2); cols.push(c.r, c.g, c.b); }
+    g.setAttribute("color", new T.Float32BufferAttribute(cols, 3));
+    env.add(new T.Mesh(g, new T.MeshBasicMaterial({vertexColors:true, side:T.BackSide})));
+    const softbox = (w, h, x, y, z, k) => { const m = new T.Mesh(new T.PlaneGeometry(w, h), new T.MeshBasicMaterial({color:new T.Color(k, k * .96, k * .92), side:T.DoubleSide})); m.position.set(x, y, z); m.lookAt(0, 0, 0); env.add(m); };
+    softbox(420, 220, -260, 320, 220, 1.5); softbox(300, 260, 320, 160, -120, .7);
+    scene.environment = new T.PMREMGenerator(renderer).fromScene(env, .04).texture;
+  }
+  scene.add(new T.HemisphereLight(0xffe4dc, 0x3b2233, .22));
+  const key = new T.DirectionalLight(0xfff1e6, 1.25);
+  key.position.set(-240, 560, 360); key.castShadow = true;
+  key.shadow.mapSize.set(small ? 1024 : 2048, small ? 1024 : 2048);
+  Object.assign(key.shadow.camera, {left:-340, right:340, top:340, bottom:-340, near:100, far:1500});
+  key.shadow.bias = -.0005; key.shadow.normalBias = .5;
+  scene.add(key);
+  const fill = new T.DirectionalLight(0xe4d8ff, .3); fill.position.set(400, 220, 140); scene.add(fill);
+  const rim = new T.DirectionalLight(0xffb6c6, .65); rim.position.set(80, 260, -500); scene.add(rim);
+
+  const M = new T.Group(); scene.add(M);
+  const floor = new T.Mesh(new T.PlaneGeometry(2000, 2000), new T.ShadowMaterial({opacity:.2}));
+  floor.rotation.x = -Math.PI / 2; floor.position.y = -80; floor.receiveShadow = true; scene.add(floor);
+
+  // ---- geometry helpers
+  const rr = (w, d, r) => {
+    const s = new T.Shape(), x = -w / 2, y = -d / 2; r = Math.min(r, w / 2, d / 2);
+    s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+    s.lineTo(x + w, y + d - r); s.quadraticCurveTo(x + w, y + d, x + w - r, y + d);
+    s.lineTo(x + r, y + d); s.quadraticCurveTo(x, y + d, x, y + d - r);
+    s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+    return s;
+  };
+  const geoCache = {};
+  // a rounded cap with a softened top edge; base at y = 0, top at y = h
+  function capGeo(w, d, h, r = 1.6, bev = .8){
+    const k = [w, d, h, r, bev].join();
+    if (geoCache[k]) return geoCache[k];
+    const g = new T.ExtrudeGeometry(rr(w - bev * 2, d - bev * 2, Math.max(.3, r - bev)), {depth:Math.max(.1, h - bev * 2), bevelEnabled:true, bevelThickness:bev, bevelSize:bev, bevelSegments:3, curveSegments:6});
+    g.rotateX(-Math.PI / 2); g.translate(0, bev, 0);
+    return geoCache[k] = g;
+  }
+  const flat = (shape, m) => { const me = new T.Mesh(new T.ShapeGeometry(shape), m); me.rotation.x = -Math.PI / 2; return me; };
+  // grip ridges around a cylinder
+  function knurl(g, n, amt){
+    const p = g.attributes.position;
+    for (let i = 0; i < p.count; i++){
+      const x = p.getX(i), z = p.getZ(i), r = Math.hypot(x, z);
+      if (r < .01) continue;
+      const a = Math.atan2(z, x), k = Math.floor((a + Math.PI) / (2 * Math.PI) * n * 2) % 2 ? 1 : 1 - amt;
+      p.setX(i, x * k); p.setZ(i, z * k);
+    }
+    g.computeVertexNormals();
+    return g;
+  }
+  const cylZ = (rt, rb, h, seg, m, open = false) => { const me = new T.Mesh(new T.CylinderGeometry(rt, rb, h, seg, 1, open), m); me.rotation.x = Math.PI / 2; return me; };
+
+  // ---- materials
+  const CAPC = {white:0xe9e5de, red:0xb8321f, orange:0xe0661a, blue:0x3f7f92};
+  const mWell = mat(0x2a2b2e, .9), mMetal = mat(0xcdd1d6, .26, 1), mNickel = mat(0xb7bbc1, .32, 1), mGold = mat(0xdcb65c, .3, 1);
+  const mHole = mat(0x050506, 1, 0, {side:T.BackSide}), mVoid = mat(0x030303, 1), mDark = mat(0x18191b, .6), mInsul = mat(0x26272a, .75);
+  const mRubber = mat(0x18191a, .9), mWhite = mat(0xf1f1ee, .35), mBlackGloss = new T.MeshPhysicalMaterial({color:0x111214, roughness:.3, clearcoat:.7, clearcoatRoughness:.2});
+
+  // ---- body, with the silkscreen painted on its top
+  const AK = 6, AW = W - BS * 2, AD = D - BS * 2;
+  const art = document.createElement("canvas"); art.width = AW * AK; art.height = AD * AK;
+  const artTex = canvasTex(art); artTex.repeat.set(1 / AW, 1 / AD); artTex.offset.set(.5, .5);
+  const bodyGeo = new T.ExtrudeGeometry(rr(AW, AD, 9), {depth:H - BS * 2, bevelEnabled:true, bevelThickness:BS, bevelSize:BS, bevelSegments:4, curveSegments:10});
+  bodyGeo.rotateX(-Math.PI / 2); bodyGeo.translate(0, BS, 0);
+  const body = new T.Mesh(bodyGeo, [mat(0xffffff, .6, 0, {map:artTex}), mat(0xd5d1c8, .58)]);
+  shadowy(body); M.add(body);
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => { const f = new T.Mesh(new T.CylinderGeometry(9, 10, 5, 28), mRubber); f.position.set(sx * (W / 2 - 32), -2, sz * (D / 2 - 32)); shadowy(f); M.add(f); });
+
+  // ---- canvas painting helpers (millimetres in, pixels out)
+  const INK = "#2c2d31", SOFT = "#5c5d61", TINK = "#163331";
+  function grain(c, w, h, a){
+    c.save(); const n = Math.floor(w * h / 60);
+    c.fillStyle = `rgba(0,0,0,${a})`; for (let i = 0; i < n; i++) c.fillRect(Math.random() * w, Math.random() * h, 2, 2);
+    c.fillStyle = `rgba(255,255,255,${a})`; for (let i = 0; i < n; i++) c.fillRect(Math.random() * w, Math.random() * h, 2, 2);
+    c.restore();
+  }
+  function painter(c, X, Y, k){
+    const P = v => v * k;
+    return {X, Y, P,
+      text(s, x, y, size, o = {}){
+        c.save(); c.font = `${o.weight || 700} ${P(size)}px ${o.font || "Barlow, sans-serif"}`;
+        c.fillStyle = o.color || INK; c.textAlign = o.align || "center"; c.textBaseline = "middle";
+        if ("letterSpacing" in c) c.letterSpacing = P(o.ls ?? size * .1) + "px";
+        c.fillText(o.raw ? s : s.toUpperCase(), X(x), Y(y)); c.restore();
+      },
+      rrect(x, y, w, h, r, fill, stroke, lw){
+        c.beginPath();
+        if (c.roundRect) c.roundRect(X(x), Y(y), P(w), P(h), P(r)); else c.rect(X(x), Y(y), P(w), P(h));
+        if (fill){ c.fillStyle = fill; c.fill(); }
+        if (stroke){ c.strokeStyle = stroke; c.lineWidth = P(lw || .3); c.stroke(); }
+      },
+      line(x1, y1, x2, y2, color, lw){ c.beginPath(); c.moveTo(X(x1), Y(y1)); c.lineTo(X(x2), Y(y2)); c.strokeStyle = color; c.lineWidth = P(lw || .3); c.stroke(); },
+      dot(x, y, r, color){ c.beginPath(); c.arc(X(x), Y(y), P(r), 0, Math.PI * 2); c.fillStyle = color; c.fill(); },
+      rule(s, x1, x2, y, color){ const mid = (x1 + x2) / 2, half = s.length * 1.1 + 2; this.line(x1, y, mid - half, y, color, .3); this.line(mid + half, y, x2, y, color, .3); this.text(s, mid, y, 2.2, {color, ls:.45}); }
+    };
+  }
+
+  // ---- control layout (mm)
+  const FKX = [45, 74, 103, 132, 161, 190], KPX = [40, 62, 84], KPY = [130, 152, 174, 196];
+  const ROWX = [82, 112, 142, 172, 202], SEQX = [312, 335, 358, 381];
+  const PADX = [246.25, 288.75, 331.25, 373.75], PADY = [314.5, 271, 227.5, 184];
+  const padXY = i => ({x:PADX[i % 4], y:PADY[Math.floor(i / 4)]});
+
+  function drawArt(){
+    const c = art.getContext("2d"), p = painter(c, v => (v - BS) * AK, v => (v - BS) * AK, AK);
+    let g = c.createLinearGradient(0, 0, 0, art.height); g.addColorStop(0, "#ece9e2"); g.addColorStop(1, "#d9d5cc");
+    c.fillStyle = g; c.fillRect(0, 0, art.width, art.height); grain(c, art.width, art.height, .045);
+    // teal control strip
+    g = c.createLinearGradient(0, p.Y(66), 0, p.Y(144)); g.addColorStop(0, "#73a9a6"); g.addColorStop(1, "#649a97");
+    p.rrect(222, 66, 176, 78, 3, g);
+    p.rrect(228, 72, 64, 33, 2, "#e0e3df"); p.rrect(228, 108, 64, 33, 2, "#e0e3df");
+    p.text("Full level", 246.5, 84, 2.3); p.text("16 levels", 276.5, 84, 2.3);
+    p.text("Next seq", 246.5, 118, 2.3); p.text("Track mute", 276.5, 118, 2.3);
+    [[322, "Filter", "Low", "Open"], [369, "Main volume", "Min", "Max"]].forEach(([x, name, lo, hi]) => {
+      p.text(name, x, 75, 2.3, {color:TINK});
+      for (let k = 0; k <= 10; k++){ const a = (-135 + k * 27) * Math.PI / 180; p.dot(x + Math.sin(a) * 14.6, 94 - Math.cos(a) * 14.6, .55, TINK); }
+      p.text(lo, x - 11, 108.6, 1.8, {color:TINK}); p.text(hi, x + 11, 108.6, 1.8, {color:TINK});
+      p.dot(x, 94, 11.8, "rgba(20,40,40,.16)");
+    });
+    p.rule("Sequence", 302, 394, 116.5, TINK);
+    SEQX.forEach((x, n) => p.text("ABCD"[n], x + 2, 125.5, 2.4, {color:TINK}));
+    // pad field
+    g = c.createLinearGradient(0, p.Y(150), 0, p.Y(345)); g.addColorStop(0, "#679f9c"); g.addColorStop(1, "#5a908d");
+    p.rrect(222, 150, 176, 195, 3, g);
+    p.rule("Drums", 228, 392, 156.5, TINK);
+    for (let i = 0; i < 16; i++){
+      const {x, y} = padXY(i);
+      p.rrect(x - 20.4, y - 19.6, 40.8, 40.8, 5, "rgba(18,42,41,.3)");
+      p.text("Pad " + (i + 1), x - 19, y - 22.6, 1.9, {color:TINK, align:"left", ls:.25});
+      p.text(PAD_LETTERS[i], x + 19, y - 22.6, 1.9, {color:TINK, align:"right", raw:true});
+    }
+    // logo
+    c.save(); c.font = `400 ${p.P(12)}px Michroma, sans-serif`; c.textAlign = "right"; c.textBaseline = "alphabetic";
+    if ("letterSpacing" in c) c.letterSpacing = p.P(.3) + "px";
+    const sw = c.measureText(BRAND.s).width;
+    c.fillStyle = INK; c.fillText(BRAND.s, p.X(396), p.Y(44));
+    c.strokeStyle = SOFT; c.lineWidth = p.P(.32); c.strokeText(BRAND.o, p.X(396) - sw - p.P(1.4), p.Y(44)); c.restore();
+    c.fillStyle = "#2b4a8d"; c.fillRect(p.X(226), p.Y(48.6), p.P(170), p.P(.55));
+    c.fillStyle = "#d23a2c"; c.fillRect(p.X(291), p.Y(47.3), p.P(105), p.P(.85));
+    p.text(BRAND.sub, 396, 54.6, 3.1, {font:"Michroma, sans-serif", weight:400, align:"right", ls:.55, raw:true});
+    // left half
+    FKX.forEach((x, n) => { p.rrect(x - 4.5, 95.6, 9, 3.4, .6, "#aaa79f"); p.text("F" + (n + 1), x, 97.35, 2, {color:"#f4f2ed", ls:.2}); });
+    p.text("Main screen", 128, 120.5, 2.2); p.text("Open window", 163, 120.5, 2.2);
+    p.text("Data", 148, 149.6, 2.4);
+    p.dot(148, 178, 26.4, "#25272b"); p.dot(148, 178, 24.6, "#16171a");
+    for (let k = 0; k < 24; k++){ const a = k * 15 * Math.PI / 180; p.line(148 + Math.sin(a) * 27.6, 178 - Math.cos(a) * 27.6, 148 + Math.sin(a) * 29.3, 178 - Math.cos(a) * 29.3, SOFT, .35); }
+    const KP = [["7", "Mixer"], ["8", "Other"], ["9", "MIDI/Sync"], ["4", "Sample"], ["5", "Trim"], ["6", "Program"], ["1", "Song"], ["2", "Misc"], ["3", "Load"], ["Shift", "+ / −"], ["0", "Step"], ["Enter", "Save"]];
+    KP.forEach(([top, sub], n) => { const x = KPX[n % 3], y = KPY[Math.floor(n / 3)]; p.text(top, x, y - 6.6, 2.3); p.text(sub, x, y + 6.5, 1.7, {color:SOFT, ls:.2}); });
+    p.rrect(27, 236, 34, 117, 2, null, SOFT, .35);
+    p.text("Note", 44, 242, 2.1); p.text("Variation", 44, 245.7, 2.1); p.text("Decay", 47, 254, 2.1);
+    p.rrect(42.8, 278, 2.4, 62, 1.2, "#1b1c1f");
+    for (let k = 0; k <= 10; k++) p.line(32.5, 280 + k * 5.8, 37, 280 + k * 5.8, SOFT, .3);
+    p.text("Tune · Decay", 44, 348.6, 1.7, {color:SOFT});
+    p.text("Tap tempo", 90.5, 245, 2.1); p.text("Note repeat", 90.5, 248.7, 2.1);
+    p.text("Undo seq", 118, 251, 2.1); p.text("Erase", 144, 251, 2.1);
+    p.text("Cursor", 187, 260.6, 1.5, {color:SOFT, ls:.1});
+    p.rule("Locate", 70, 214, 281, SOFT);
+    ["◀ Step", "Step ▶", "Go to", "◀◀ Bar", "Bar ▶▶"].forEach((s, n) => p.text(s, ROWX[n], 290, 2.1));
+    ["Rec", "Over dub", "Stop", "Play", "Play start"].forEach((s, n) => p.text(s, ROWX[n] + ([0, 1, 3].includes(n) ? 2.5 : 0), 317.5, 2.1));
+    artTex.needsUpdate = true;
+  }
+
+  // ---- buttons: rounded caps sunk into dark openings, so they sit in the panel instead of on it
+  const pickables = [], caps = [], leds = [], elMap = new Map();
+  const mapEl = (el, ...objs) => { if (el) elMap.set(el, (elMap.get(el) || []).concat(objs)); };
+  function addLed(sel, x, y, color){
+    const el = typeof sel === "string" ? $(sel) : sel; if (!el) return;
+    const red = color === "red" || el.classList.contains("red");
+    const m = new T.Mesh(new T.CylinderGeometry(1.3, 1.3, 1, 18), mat(0x5f4f45, .3, 0, {emissive:red ? 0xff3b2b : color === "green" ? 0x86ff6a : 0xd8ff4f, emissiveIntensity:0}));
+    m.position.copy(at(x, y, H + .25)); M.add(m);
+    leds.push({m, el, on:red ? 0xff6a5a : color === "green" ? 0xa8ff95 : 0xeaff9a});
+  }
+  function addCap(o){
+    const el = o.el || $(o.sel); if (!el) return null;
+    const well = flat(rr(o.w + 2, o.d + 2, 2.2), mWell); well.position.copy(at(o.x, o.y, H + .06)); well.receiveShadow = true; M.add(well);
+    const g = new T.Group(); g.position.copy(at(o.x, o.y, H - 1.6)); M.add(g);
+    const m = new T.Mesh(capGeo(o.w, o.d, o.h + 1.6, 1.7, .9), mat(CAPC[o.color || "white"], .42));
+    shadowy(m); g.add(m);
+    if (o.glyph !== undefined){
+      const s = new T.Shape(); s.moveTo(0, 1.6); s.lineTo(1.5, -1); s.lineTo(-1.5, -1); s.closePath();
+      const gl = flat(s, mat(0x55565a, .5)); gl.rotation.z = o.glyph; gl.position.y = o.h + 1.65; g.add(gl);
+    }
+    m.userData = {kind:"button", el, hold:!!o.hold, group:g, baseY:g.position.y, down:false};
+    pickables.push(m); caps.push(m); mapEl(el, m);
+    if (o.led) addLed(o.led[0], o.led[1], o.led[2]);
+    return m;
+  }
+  FKX.forEach((x, n) => addCap({sel:`[data-fk="${n}"]`, x, y:104, w:17, d:7, h:4}));
+  addCap({sel:"#mainBtn", x:128, y:128, w:17, d:8, h:4.5});
+  addCap({sel:"#windowBtn", x:163, y:128, w:17, d:8, h:4.5, color:"orange"});
+  const keypadCaps = [...document.querySelectorAll("#keypad .cap")].map((el, n) => addCap({el, x:KPX[n % 3], y:KPY[Math.floor(n / 3)], w:15, d:7, h:4, color:n === 9 || n === 11 ? "white" : "blue"}));
+  mapEl($("#keypad"), ...keypadCaps.filter(Boolean));
+  addCap({sel:"#afterBtn", x:44, y:264, w:15, d:7, h:4, led:["#afterLed", 37.5, 254]});
+  addCap({sel:"#tapBtn", x:90, y:260, w:21, d:12, h:5, hold:true, led:["#rptLed", 78.5, 245]});
+  addCap({sel:"#undoBtn", x:118, y:260.5, w:16, d:8, h:4.5});
+  addCap({sel:"#eraseBtn", x:144, y:260.5, w:16, d:8, h:4.5, hold:true});
+  addCap({sel:'[data-cur="up"]', x:187, y:250.5, w:10, d:8, h:4.5, glyph:0});
+  addCap({sel:'[data-cur="left"]', x:175, y:260.5, w:10, d:8, h:4.5, glyph:Math.PI / 2});
+  addCap({sel:'[data-cur="right"]', x:199, y:260.5, w:10, d:8, h:4.5, glyph:-Math.PI / 2});
+  addCap({sel:'[data-cur="down"]', x:187, y:270.5, w:10, d:8, h:4.5, glyph:Math.PI});
+  ["-1", "1", "start", "-16", "16"].forEach((d, n) => addCap({sel:`[data-loc="${d}"]`, x:ROWX[n], y:298.5, w:18, d:8, h:4.5}));
+  addCap({sel:"#recBtn", x:82, y:328, w:20, d:10, h:5, color:"red", led:["#recLed", 77.5, 317.5]});
+  addCap({sel:"#odBtn", x:112, y:328, w:20, d:10, h:5, color:"red", led:["#odLed", 105.5, 317.5]});
+  addCap({sel:"#stopBtn", x:142, y:328, w:20, d:10, h:5});
+  addCap({sel:"#playBtn", x:172, y:328, w:20, d:10, h:5, led:["#playLed", 167.5, 317.5]});
+  addCap({sel:"#startBtn", x:202, y:328, w:20, d:10, h:5});
+  addCap({sel:"#fullBtn", x:244, y:95, w:16, d:7, h:4, led:["#fullLed", 234.5, 84]});
+  addCap({sel:"#lvlBtn", x:274, y:95, w:16, d:7, h:4, led:["#lvlLed", 264.5, 84]});
+  addCap({sel:"#nextBtn", x:244, y:129, w:16, d:7, h:4, led:["#nextLed", 234.5, 118]});
+  addCap({sel:"#tmBtn", x:274, y:129, w:16, d:7, h:4, led:["#tmLed", 264.5, 118]});
+  const seqCtl = document.querySelectorAll("#seqBtns .ctl");
+  SEQX.forEach((x, n) => addCap({sel:`[data-seq="${n}"]`, x, y:134, w:16, d:7, h:4, led:[seqCtl[n].querySelector(".led"), x - 4, 125.5]}));
+
+  // ---- pads: soft rubber blocks set into the mat, lit from inside when hit
+  const GLOWHEX = {drum:0xe5452f, hat:0xe7991b, keys:0x2f8fcf, voice:0x8d5bd8};
+  const padGeo = capGeo(37, 37, 8, 4.6, 1.9), padCv = [], padTex = [], padMeshes = [];
+  for (let i = 0; i < 16; i++){
+    const cv = document.createElement("canvas"); cv.width = cv.height = 256; padCv.push(cv);
+    const tex = canvasTex(cv); tex.repeat.set(1 / 33.2, 1 / 33.2); tex.offset.set(.5, .5); padTex.push(tex);
+    const {x, y} = padXY(i);
+    const m = new T.Mesh(padGeo, [mat(0xffffff, .86, 0, {map:tex, emissive:0x000000}), mat(0x566463, .9, 0, {emissive:0x000000})]);
+    m.position.copy(at(x, y, H - 2.6)); shadowy(m); M.add(m);
+    m.userData = {kind:"pad", i, baseY:m.position.y};
+    pickables.push(m); padMeshes.push(m); mapEl(padEls[i], m);
+  }
+  function drawPad(i){
+    const c = padCv[i].getContext("2d"), s = 256, sel = !levels16 && i === selected;
+    c.fillStyle = sel ? "#7c8c8b" : "#6b7b7a"; c.fillRect(0, 0, s, s);
+    grain(c, s, s, .06);
+    const g = c.createRadialGradient(80, 60, 10, 128, 128, 200); g.addColorStop(0, "rgba(255,255,255,.14)"); g.addColorStop(1, "rgba(0,0,0,.08)");
+    c.fillStyle = g; c.fillRect(0, 0, s, s);
+    let name = levels16 ? `${padLabel(levelSrc).slice(0, 9)} ${fmtSigned(i - LEVEL_BASE)}` : padLabel(i);
+    if (trackMute && S.mute[i]) name = "Muted";
+    c.font = "700 25px Barlow, sans-serif"; c.textAlign = "left"; c.textBaseline = "alphabetic";
+    c.fillStyle = !levels16 && S.mute[i] ? "rgba(28,42,41,.35)" : "rgba(28,42,41,.74)";
+    c.fillText(name.toUpperCase(), 20, 232, 216);
+    c.strokeStyle = "rgba(255,255,255,.4)"; c.lineWidth = 2; c.beginPath(); c.roundRect ? c.roundRect(196, 18, 40, 32, 6) : c.rect(196, 18, 40, 32); c.stroke();
+    c.fillStyle = "rgba(255,255,255,.75)"; c.font = "700 21px Barlow, sans-serif"; c.textAlign = "center"; c.fillText(PADS[i].key.toUpperCase(), 216, 42);
+    if (!levels16 && samples[i]){ c.textAlign = "left"; c.font = "700 17px Barlow, sans-serif"; c.fillText("SAMPLE", 20, 44); }
+    padTex[i].needsUpdate = true;
+  }
+
+  // ---- knobs with knurled grips and a coloured cap
+  const knobs = {};
+  function addKnob(o){
+    const el = $(o.sel), g = new T.Group(); g.position.copy(at(o.x, 94, H)); M.add(g);
+    const skirt = new T.Mesh(new T.CylinderGeometry(10.2, 10.9, 3, 48), mat(0x8e8a82, .5)); skirt.position.y = 1.5;
+    const grip = new T.Mesh(knurl(new T.CylinderGeometry(8.4, 8.9, 12, 72, 1), 36, .05), mat(0xc9c5bc, .45, 0, {flatShading:true})); grip.position.y = 9;
+    const top = new T.Mesh(new T.CylinderGeometry(7.5, 7.7, 1.4, 48), mat(o.cap, .32)); top.position.y = 15.6;
+    const ind = new T.Mesh(new T.BoxGeometry(1.2, .5, 6.2), mat(o.ind, .4)); ind.position.set(0, 16.45, -3.7);
+    const spin = new T.Group(); spin.add(grip, top, ind); g.add(skirt, spin); shadowy(skirt, grip, top);
+    [skirt, grip, top, ind].forEach(m => { m.userData = {kind:"knob", key:o.key}; pickables.push(m); });
+    mapEl(el, skirt, grip, top, ind);
+    knobs[o.key] = {spin, get:o.get, set:o.set};
+  }
+  addKnob({key:"cut", sel:"#cutKnob", x:322, cap:0xd8452f, ind:0xffffff, get:() => S.cutoff, set:v => { setCut(v); paintCut(); }});
+  addKnob({key:"vol", sel:"#volKnob", x:369, cap:0xe9e6df, ind:0x3a3b3f, get:() => S.volume, set:v => { setVol(v); paintVol(); }});
+
+  // ---- data wheel
+  const wheel = new T.Group(); wheel.position.copy(at(148, 178, H)); M.add(wheel);
+  {
+    const body = new T.Mesh(knurl(new T.CylinderGeometry(22.6, 23.2, 13, 120, 1), 60, .028), mat(0x1c1e21, .55, 0, {flatShading:true})); body.position.y = 6.5;
+    const top = new T.Mesh(new T.CylinderGeometry(21.2, 21.2, .8, 64), mat(0x25272b, .32)); top.position.y = 13.2;
+    const ring = new T.Mesh(new T.TorusGeometry(15.5, .3, 8, 64), mat(0x34373c, .3)); ring.rotation.x = Math.PI / 2; ring.position.y = 13.6;
+    const dimple = new T.Mesh(new T.CylinderGeometry(5.2, 4.6, .7, 32), mat(0x0d0e0f, .55)); dimple.position.set(0, 13.4, -12.6);
+    const dring = new T.Mesh(new T.TorusGeometry(5.3, .55, 10, 32), mat(0x3a3d42, .3)); dring.rotation.x = Math.PI / 2; dring.position.set(0, 13.65, -12.6);
+    wheel.add(body, top, ring, dimple, dring); shadowy(body, top);
+    [body, top, ring, dimple, dring].forEach(m => { m.userData = {kind:"wheel"}; pickables.push(m); });
+    mapEl($("#wheel"), body, top);
+  }
+  let wheelRot = 0;
+  const domSpin = spinWheel; spinWheel = d => { domSpin(d); wheelRot += d; };
+
+  // ---- note variation slider
+  const fader = new T.Group(); M.add(fader);
+  {
+    const slot = flat(rr(2.6, 62, 1.3), mVoid); slot.position.copy(at(44, 309, H + .08)); M.add(slot);
+    const stem = new T.Mesh(new T.BoxGeometry(2, 4, 4), mDark); stem.position.y = 1;
+    const cap = new T.Mesh(capGeo(15, 9, 10, 1.4, .8), mat(0xeeebe5, .4)); cap.position.y = 1.5;
+    const line = new T.Mesh(new T.BoxGeometry(15.3, .3, 1.6), mat(0x5b8b89, .4)); line.position.y = 11.6;
+    fader.add(stem, cap, line); shadowy(cap);
+    [cap, line].forEach(m => { m.userData = {kind:"fader"}; pickables.push(m); });
+    mapEl($("#vfader"), cap);
+  }
+
+  // ---- LCD housing: a glossy black wedge, its screen drawn live
+  const hd = 74, hw = 176;
+  const hs = new T.Shape(); hs.moveTo(-hd / 2, 0); hs.lineTo(hd / 2, 0); hs.lineTo(hd / 2, 25); hs.lineTo(-hd / 2, 7); hs.closePath();
+  const hg = new T.ExtrudeGeometry(hs, {depth:hw - 2.4, bevelEnabled:true, bevelThickness:1.2, bevelSize:1.2, bevelSegments:3});
+  hg.rotateY(Math.PI / 2); hg.translate(-(hw - 2.4) / 2, 0, 0);
+  const housing = new T.Mesh(hg, mBlackGloss); housing.position.copy(at(117, 56, H)); shadowy(housing); M.add(housing);
+  for (let k = 0; k < 9; k++){ const v = new T.Mesh(new T.BoxGeometry(hw * .78, 1.2, .5), mVoid); v.position.set(0, 10 + k * 1.8, -hd / 2 - 1.3); housing.add(v); }
+  const lcv = document.createElement("canvas"); lcv.width = 1312; lcv.height = 512;
+  const lcdTex = canvasTex(lcv), LCDR = {x:52, y:66, w:1208, h:420};
+  const slope = Math.atan2(18, hd);
+  const screen = new T.Mesh(new T.PlaneGeometry(164, 64), new T.MeshStandardMaterial({map:lcdTex, emissive:0xffffff, emissiveMap:lcdTex, emissiveIntensity:.3, roughness:.16}));
+  screen.rotation.x = -(Math.PI / 2 - slope);
+  screen.position.set(0, 16 + Math.cos(slope) * 1.45, Math.sin(slope) * 1.45);
+  housing.add(screen); pickables.push(screen);
+  const fieldOf = new Map(Object.entries(fldEls).map(([f, el]) => [el, f]));
+  let fieldRects = {};
+  const INK_L = "#1c2630", BG_L = "#bfcbcd";
+  function lcdRows(){
+    const fv = f => ({f, t:FIELDS[cur] === f && entry !== "" ? (neg ? "-" : "") + entry + "_" : F[f].get()});
+    return [
+      [[{t:"Seq:"}, fv("seq"), {t:" Bars:"}, fv("bars")], [{t:"Now:" + $("#lcdNow").textContent + " "}, {t:$("#lcdMode").textContent.trim(), inv:true}]],
+      [[{t:"Bpm:"}, fv("bpm"), {t:" Swing:"}, fv("swing")], [{t:"Rpt:"}, fv("rate")]],
+      [[{t:"Pad:"}, fv("pad"), {t:" " + padLabel(selected)}], [{t:"Velo:" + $("#lcdVelo").textContent.trim()}]],
+      [[{t:"Tune:"}, fv("tune"), {t:" Decay:"}, fv("decay"), {t:" Lvl:"}, fv("level")], [{t:"Rev:"}, fv("reverb")]],
+    ];
+  }
+  const stepIndex = () => stepLeds.findIndex(l => l.classList.contains("on"));
+  const tabText = () => [0, 1, 2, 3, 4, 5].map(k => $("#tab" + k).textContent).join("|");
+  function drawLCD(now, rows){
+    const c = lcv.getContext("2d"), {x, y, w, h} = LCDR, blinkOn = Math.floor(now / 400) % 2 === 0;
+    c.fillStyle = "#0e0f11"; c.fillRect(0, 0, lcv.width, lcv.height);
+    c.fillStyle = "#7c848a"; c.font = "600 16px Barlow, sans-serif"; c.textAlign = "center"; c.textBaseline = "middle";
+    if ("letterSpacing" in c) c.letterSpacing = "5px";
+    c.fillText("INTEGRATED RHYTHM MACHINE  ·  16-BIT DRUM SAMPLER  ·  LOOP SEQUENCER", lcv.width / 2, 38);
+    if ("letterSpacing" in c) c.letterSpacing = "0px";
+    let g = c.createLinearGradient(0, y, 0, y + h); g.addColorStop(0, "#c3ced1"); g.addColorStop(.6, "#aab7bb"); g.addColorStop(1, "#99a7ab");
+    c.fillStyle = g; c.fillRect(x, y, w, h);
+    c.fillStyle = "rgba(28,38,48,.05)";
+    for (let gx = x; gx < x + w; gx += 4) c.fillRect(gx, y, 1, h);
+    for (let gy = y; gy < y + h; gy += 4) c.fillRect(x, gy, w, 1);
+    c.font = "46px VT323, monospace"; c.textAlign = "left"; c.textBaseline = "middle";
+    fieldRects = {};
+    const L = x + 26, R = x + w - 26, lh = 50;
+    const drawParts = (parts, sx, cy) => {
+      let px = sx;
+      for (const pt of parts){
+        const tw = c.measureText(pt.t).width, isCur = pt.f && FIELDS[cur] === pt.f, editing = isCur && entry !== "";
+        const inv = pt.inv || (isCur && !(editing && !blinkOn));
+        if (inv){ c.fillStyle = INK_L; c.fillRect(px - 3, cy - 22, tw + 6, 42); c.fillStyle = BG_L; } else c.fillStyle = INK_L;
+        c.fillText(pt.t, px, cy + 2);
+        if (pt.f){
+          fieldRects[pt.f] = {x:px - 3, y:cy - 22, w:tw + 6, h:42};
+          if (hlFields.has(pt.f) && blinkOn){ c.strokeStyle = "#d9466f"; c.lineWidth = 4; c.strokeRect(px - 8, cy - 27, tw + 16, 52); }
+        }
+        px += tw;
+      }
+    };
+    rows.forEach(([left, right], n) => {
+      const cy = y + 40 + n * lh;
+      drawParts(left, L, cy);
+      drawParts(right, R - right.reduce((a, pt) => a + c.measureText(pt.t).width, 0), cy);
+    });
+    const sy = y + 40 + 4 * lh - 8, on = stepIndex(), bw = (R - L - 15 * 7) / 16;
+    for (let k = 0; k < 16; k++){
+      c.strokeStyle = k % 4 ? "rgba(28,38,48,.4)" : "rgba(28,38,48,.85)"; c.lineWidth = 2;
+      c.strokeRect(L + k * (bw + 7), sy - 7, bw, 14);
+      if (k === on){ c.fillStyle = INK_L; c.fillRect(L + k * (bw + 7), sy - 7, bw, 14); }
+    }
+    c.fillStyle = "#5d6c76"; c.fillText($("#lcdMsg").textContent.trim(), L, sy + 46);
+    const ty = y + h - 38, tw = (R - L - 5 * 7) / 6;
+    c.textAlign = "center";
+    for (let k = 0; k < 6; k++){ c.fillStyle = INK_L; c.fillRect(L + k * (tw + 7), ty - 20, tw, 40); c.fillStyle = BG_L; c.fillText($("#tab" + k).textContent, L + k * (tw + 7) + tw / 2, ty + 2); }
+    g = c.createLinearGradient(x, y, x + w * .55, y + h); g.addColorStop(0, "rgba(255,255,255,.2)"); g.addColorStop(.5, "rgba(255,255,255,0)");
+    c.fillStyle = g; c.fillRect(x, y, w, h);
+    lcdTex.needsUpdate = true;
+  }
+
+  // ---- front face: floppy drive with door, eject button and access light
+  const FW = W - 26, FH = H - 8;
+  const frontCv = document.createElement("canvas"); frontCv.width = FW * AK; frontCv.height = FH * AK;
+  const rearCv = document.createElement("canvas"); rearCv.width = FW * AK; rearCv.height = FH * AK;
+  const front = new T.Group(); front.position.z = D / 2 + .12; M.add(front);
+  const rear = new T.Group(); rear.rotation.y = Math.PI; rear.position.z = -D / 2 - .12; M.add(rear);
+  [[front, frontCv], [rear, rearCv]].forEach(([grp, cv]) => { const pl = new T.Mesh(new T.PlaneGeometry(FW, FH), mat(0xffffff, .58, 0, {map:canvasTex(cv)})); pl.position.y = H / 2; pl.receiveShadow = true; grp.add(pl); grp.userData.plane = pl; });
+  const fx = px => px - W / 2;  // distance from the left edge as seen from that face
+  {
+    const frame = new T.Mesh(capGeo(98, 18, 1.6, 2, .5), mDark); frame.rotation.x = Math.PI / 2; frame.position.set(fx(76), 34, 0); front.add(frame);
+    const door = new T.Mesh(new T.BoxGeometry(82, 8.5, .4), mat(0x2b2c2f, .5)); door.position.set(fx(71), 33, 1.75); front.add(door);
+    const slot = new T.Mesh(new T.BoxGeometry(82, 1.6, .3), mVoid); slot.position.set(fx(71), 38.6, 1.75); front.add(slot);
+    const eject = new T.Mesh(capGeo(10, 5, 2.4, 1, .4), mat(0xd3cfc6, .45)); eject.rotation.x = Math.PI / 2; eject.position.set(fx(117), 31.5, 1.5); shadowy(eject); front.add(eject);
+    const fled = new T.Mesh(new T.BoxGeometry(4.4, 2, .7), mat(0x3b4f33, .3, 0, {emissive:0x86ff6a, emissiveIntensity:0})); fled.position.set(fx(31), 22.5, .4); front.add(fled);
+    leds.push({m:fled, el:$(".fled"), on:0xa8ff95});
+  }
+  function drawFront(){
+    const c = frontCv.getContext("2d"), p = painter(c, v => (v - 13) * AK, v => (H - 4 - v) * AK, AK);
+    c.fillStyle = "#d5d1c8"; c.fillRect(0, 0, frontCv.width, frontCv.height); grain(c, frontCv.width, frontCv.height, .04);
+    const curve = () => { c.beginPath(); c.moveTo(p.X(150), p.Y(4)); c.bezierCurveTo(p.X(196), p.Y(4), p.X(204), p.Y(47), p.X(262), p.Y(47)); c.lineTo(p.X(W - 13), p.Y(47)); };
+    curve(); c.lineTo(p.X(W - 13), p.Y(4)); c.closePath(); c.fillStyle = "rgba(0,0,0,.055)"; c.fill();
+    curve(); c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = p.P(.5); c.stroke();
+    p.text(BRAND.front, W - 24, 27, 6.4, {font:"Michroma, sans-serif", weight:400, color:"#8b8881", align:"right", ls:1.1, raw:true});
+    p.text('3.5" HD floppy · 1.44 MB', 76, 21, 2.3, {color:"#86837c", ls:.5});
+    front.userData.plane.material.map.needsUpdate = true;
+  }
+
+  // ---- rear panel: real female connectors on a black plate
+  const rpos = (o, rx, wy, z = 0) => { o.position.set(rx - W / 2, wy, z); rear.add(o); return o; };
+  function screw(rx, wy){
+    const g = new T.Group(), head = cylZ(2.4, 2.4, 1.2, 20, mNickel), slotm = new T.Mesh(new T.BoxGeometry(3.8, .6, .4), mVoid);
+    head.position.z = .6; slotm.position.z = 1.25; slotm.rotation.z = Math.random() * Math.PI; g.add(head, slotm); return rpos(g, rx, wy);
+  }
+  function jack(rx, wy){  // 1/4" socket: hex nut, sleeve, and a hole you can see into
+    const g = new T.Group();
+    const nut = cylZ(6.4, 6.4, 2.4, 6, mNickel); nut.position.z = 1.2; nut.rotation.y = Math.PI / 6;
+    const sleeve = cylZ(4.3, 4.3, 4.4, 32, mMetal, true); sleeve.position.z = 2.4 + 2.2;
+    const lip = new T.Mesh(new T.TorusGeometry(4.3, .45, 10, 32), mMetal); lip.position.z = 6.6;
+    const face = new T.Mesh(new T.RingGeometry(3.2, 4.3, 32), mInsul); face.position.z = 6.62;
+    const hole = cylZ(3.2, 3.2, 6, 24, mHole, true); hole.position.z = 3.6;
+    const bottom = new T.Mesh(new T.CircleGeometry(3.2, 24), mVoid); bottom.position.z = .7;
+    g.add(nut, sleeve, lip, face, hole, bottom); shadowy(nut, sleeve);
+    return rpos(g, rx, wy);
+  }
+  function din(rx, wy){  // MIDI socket: metal shell, recessed insulator, five pin holes and a key notch
+    const g = new T.Group();
+    const shell = new T.Mesh(new T.RingGeometry(8, 10, 48), mMetal); shell.position.z = 1.6;
+    const side = cylZ(10, 10, 1.6, 48, mMetal, true); side.position.z = .8;
+    const cup = cylZ(8, 8, 3, 48, mat(0x3a3c40, .4, .8, {side:T.BackSide}), true); cup.position.z = .1;
+    const insul = new T.Mesh(new T.CircleGeometry(8, 48), mInsul); insul.position.z = -1.35;
+    g.add(shell, side, cup, insul);
+    [180, 225, 270, 315, 360].forEach(a => { const h = new T.Mesh(new T.CircleGeometry(.95, 16), mVoid); const r = a * Math.PI / 180; h.position.set(Math.cos(r) * 4.6, Math.sin(r) * 4.6, -1.33); g.add(h); });
+    const notch = new T.Mesh(new T.PlaneGeometry(2.6, 2), mVoid); notch.position.set(0, 6.4, -1.32); g.add(notch);
+    shadowy(side);
+    rpos(g, rx, wy); screw(rx - 13.5, wy); screw(rx + 13.5, wy);
+  }
+  function rca(rx, wy){
+    const g = new T.Group();
+    const nut = cylZ(5.4, 5.4, 1.6, 6, mNickel); nut.position.z = .8;
+    const sleeve = cylZ(4, 4, 7, 32, mGold, true); sleeve.position.z = 1.6 + 3.5;
+    const ins = new T.Mesh(new T.RingGeometry(1.5, 3.6, 32), mWhite); ins.position.z = 7.4;
+    const pin = new T.Mesh(new T.CircleGeometry(1.5, 16), mVoid); pin.position.z = 7.42;
+    const cup = cylZ(3.6, 3.6, 5.6, 24, mat(0xb08f3c, .35, 1, {side:T.BackSide}), true); cup.position.z = 4.6;
+    g.add(nut, sleeve, ins, pin, cup); shadowy(nut, sleeve);
+    return rpos(g, rx, wy);
+  }
+  function plug(rx, wy){
+    const g = new T.Group();
+    const ring = new T.Mesh(new T.RingGeometry(4.5, 5.6, 32), mDark); ring.position.z = .05;
+    const dome = new T.Mesh(new T.SphereGeometry(4.6, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2), mWhite); dome.rotation.x = Math.PI / 2; dome.scale.set(1, .45, 1);
+    g.add(ring, dome); shadowy(dome);
+    return rpos(g, rx, wy);
+  }
+  const ROW1 = 59, ROW2 = 29;
+  jack(24, ROW1); jack(40, ROW1); jack(56, ROW1); jack(78, ROW1); jack(94, ROW1);
+  din(124, ROW1); din(154, ROW1); din(186, ROW1); din(216, ROW1);
+  {  // SCSI port
+    const shell = new T.Mesh(capGeo(46, 13, 3.4, 1.5, .5), mMetal); shell.rotation.x = Math.PI / 2; shell.position.set(0, 0, 0);
+    const inner = new T.Mesh(new T.PlaneGeometry(39, 6.8), mVoid); inner.position.z = 3.45;
+    const pins = new T.Group();
+    for (let r = 0; r < 2; r++) for (let k = 0; k < 25; k++){ const pn = new T.Mesh(new T.PlaneGeometry(.7, 1.3), mNickel); pn.position.set(-17.6 + k * 1.47 + r * .7, r ? -1.5 : 1.5, 3.5); pins.add(pn); }
+    const posts = [-27, 27].map(dx => { const p = cylZ(1.7, 1.7, 6, 16, mNickel); p.position.set(dx, 0, 3); return p; });
+    const g = new T.Group(); g.add(shell, inner, pins, ...posts); shadowy(shell, ...posts);
+    rpos(g, 258, ROW1 - 2);
+  }
+  {  // rocker power switch and IEC inlet
+    const bez = new T.Mesh(capGeo(16, 13, 2.2, 1.5, .5), mDark); bez.rotation.x = Math.PI / 2;
+    const rock = new T.Mesh(capGeo(11.5, 9, 3.2, 1.2, .5), mat(0x222326, .45)); rock.rotation.x = Math.PI / 2 - .22; rock.position.z = 1;
+    const g = new T.Group(); g.add(bez, rock); shadowy(bez, rock); rpos(g, 342, ROW1);
+    const frame = new T.Mesh(capGeo(30, 24, 3.2, 2.5, .6), mat(0x141516, .5)); frame.rotation.x = Math.PI / 2;
+    const well = new T.Mesh(new T.PlaneGeometry(23, 16), mVoid); well.position.z = 3.25;
+    const pins = [[-5, -1, 4], [5, -1, 4], [0, 3.5, 1.2]].map(([px, py, w2]) => { const pn = new T.Mesh(new T.BoxGeometry(w2 > 3 ? 1.2 : 4, w2 > 3 ? 4 : 1.2, 3), mNickel); pn.position.set(px, py, 1.9); return pn; });
+    const ig = new T.Group(); ig.add(frame, well, ...pins); shadowy(frame); rpos(ig, 377, ROW1 - 2);
+  }
+  plug(24, ROW2); plug(40, ROW2);
+  for (let k = 0; k < 8; k++) plug(64 + k * 15, ROW2);
+  rca(198, ROW2); rca(216, ROW2);
+  [[15, 75], [393, 75], [15, 13], [393, 13]].forEach(([x, y]) => screw(x, y));
+  function drawRear(){
+    const c = rearCv.getContext("2d"), p = painter(c, v => (v - 13) * AK, v => (H - 4 - v) * AK, AK), LB = "#c3c7cb";
+    c.fillStyle = "#cdc9c0"; c.fillRect(0, 0, rearCv.width, rearCv.height); grain(c, rearCv.width, rearCv.height, .04);
+    p.rrect(12, 78, 384, 68, 2.2, "#1c1d20");
+    [[24, "Phones"], [40, "Right"], [56, "Left"], [78, "Right"], [94, "Left"], [124, "B"], [154, "A"], [186, "2"], [216, "1"], [258, "SCSI"], [342, "Power"]].forEach(([x, s]) => p.text(s, x, 72.5, 2, {color:LB}));
+    [[48, 40, 56, "Stereo out"], [86, 78, 94, "Record in"], [139, 124, 154, "MIDI out"], [201, 186, 216, "MIDI in"]].forEach(([x, a, b, s]) => { p.line(a - 4, 46, b + 4, 46, "#7d8389", .3); p.text(s, x, 43.2, 2, {color:LB}); });
+    p.text("On   ·   Off", 342, 48, 1.7, {color:LB});
+    p.text("AC 120V  60Hz  23W", 377, 73, 1.7, {color:LB});
+    [[24, "Out"], [40, "In"], [198, "Out"], [216, "In"]].forEach(([x, s]) => p.text(s, x, 37.6, 1.9, {color:LB}));
+    for (let k = 0; k < 8; k++) p.text(String(8 - k), 64 + k * 15, 37.6, 1.9, {color:LB});
+    [[32, 24, 40, "Digital"], [116.5, 60, 173, "Assignable mix out"], [207, 198, 216, "SMPTE"]].forEach(([x, a, b, s]) => { p.line(a - 5, 20.5, b + 5, 20.5, "#7d8389", .3); p.text(s, x, 17.5, 2, {color:LB}); });
+    p.rrect(287, 70, 42, 15, .8, "#ecebe5");
+    p.text("Warning", 308, 66.2, 2.1, {color:"#2e2e2e", ls:.4}); p.text("Shock hazard · do not open", 308, 62.6, 1.4, {color:"#3a3a3a", ls:.08}); p.text("Refer servicing to qualified staff", 308, 59.6, 1.25, {color:"#3a3a3a", ls:.04});
+    c.fillStyle = "#f1f0ea"; c.fillRect(p.X(238), p.Y(46), p.P(40), p.P(6.5));
+    for (let k = 0, bx = 240; bx < 276; k++){ const bw = [.35, .7, .35, 1, .5][k % 5]; c.fillStyle = "#111"; c.fillRect(p.X(bx), p.Y(45.2), p.P(bw), p.P(4)); bx += bw + [.45, .35, .6][k % 3]; }
+    p.text("⚠  Warning: to reduce the risk of fire or electric shock,", 282, 32.5, 1.55, {color:LB, ls:.05});
+    p.text("do not expose this product to rain or moisture.", 282, 29.5, 1.55, {color:LB, ls:.05});
+    p.text("Caution · risk of electric shock · do not open", 282, 25.5, 1.4, {color:"#8f959b", ls:.05});
+    p.rrect(330, 36, 60, 14, .6, null, "#8d939a", .35);
+    p.text(BRAND.model, 360, 31.6, 2.1, {color:LB, raw:true, ls:.35}); p.text("Made for the beat", 360, 27.2, 1.5, {color:"#8f959b", ls:.2});
+    rear.userData.plane.material.map.needsUpdate = true;
+  }
+
+  // ---- side details: spec sticker on the left, vents on the right
+  {
+    const sc = document.createElement("canvas"); sc.width = 420; sc.height = 150; const c = sc.getContext("2d");
+    c.fillStyle = "#f4f2ed"; c.fillRect(0, 0, 420, 150); c.fillStyle = "#4a4a4a"; c.font = "700 20px Barlow, sans-serif"; c.fillText("SPECIFICATIONS", 18, 32);
+    c.fillStyle = "#9a9892"; for (let k = 0; k < 6; k++) c.fillRect(18, 50 + k * 15, [380, 300, 350, 240, 330, 200][k], 5);
+    const st = new T.Mesh(new T.PlaneGeometry(70, 25), mat(0xffffff, .6, 0, {map:canvasTex(sc)})); st.rotation.y = -Math.PI / 2; st.position.set(-W / 2 - .15, H / 2, 40); M.add(st);
+    for (let k = 0; k < 7; k++){ const v = new T.Mesh(new T.PlaneGeometry(56, 2.2), mat(0x77736c, .8)); v.rotation.y = Math.PI / 2; v.position.set(W / 2 + .15, 30 + k * 4.6, -60); M.add(v); }
+  }
+
+  // ---- camera
+  const VIEWS3 = {three:{az:30, el:36, zoom:1, tx:0, tz:0}, play:{az:0, el:56, zoom:.88, tx:0, tz:8}, pads:{az:0, el:64, zoom:.5, tx:106, tz:62}, back:{az:180, el:26, zoom:.95, tx:0, tz:0}};
+  let cam = {...VIEWS3[pendingView] || VIEWS3.three}, anim = null;
+  const target = new T.Vector3();
+  function placeCamera(){
+    const vf = camera.fov * Math.PI / 180, hf = 2 * Math.atan(Math.tan(vf / 2) * camera.aspect);
+    const dist = Math.max(300 / Math.sin(vf / 2), 300 / Math.sin(hf / 2)) * .9 * cam.zoom;
+    const az = cam.az * Math.PI / 180, el = cam.el * Math.PI / 180;
+    target.set(cam.tx, H * .35, cam.tz);
+    camera.position.set(target.x + dist * Math.cos(el) * Math.sin(az), target.y + dist * Math.sin(el), target.z + dist * Math.cos(el) * Math.cos(az));
+    camera.lookAt(target);
+  }
+  function setView3(name, animate){
+    const to = {...VIEWS3[name]}; to.az += 360 * Math.round((cam.az - to.az) / 360);
+    if (!animate || reduceMotion.matches){ cam = to; anim = null; } else anim = {from:{...cam}, to, t0:performance.now()};
+  }
+  function resize(){
+    const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return;
+    renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+  }
+  new ResizeObserver(resize).observe(host); resize();
+
+  // ---- pointer input: pads, buttons, knobs, slider, wheel and the screen; anything else orbits
+  const ray = new T.Raycaster(), ndc = new T.Vector2(), active = new Map();
+  const pickList = pickables.concat([body, housing]);
+  function pick(e){
+    const r = canvas.getBoundingClientRect();
+    ndc.set((e.clientX - r.left) / r.width * 2 - 1, -(e.clientY - r.top) / r.height * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    return ray.intersectObjects(pickList, false)[0] || null;
+  }
+  const wheelCenter = new T.Vector3();
+  function wheelAngle(e){
+    wheel.getWorldPosition(wheelCenter); wheelCenter.y += 13; wheelCenter.project(camera);
+    const r = canvas.getBoundingClientRect();
+    return Math.atan2(e.clientY - (r.top + (1 - wheelCenter.y) / 2 * r.height), e.clientX - (r.left + (wheelCenter.x + 1) / 2 * r.width)) * 180 / Math.PI;
+  }
+  const holdEvent = (u, type, id) => u.el.dispatchEvent(new PointerEvent(type, {bubbles:true, pointerId:9000 + id, button:0}));
+  canvas.addEventListener("pointerdown", e => {
+    if (e.button !== 0) return;
+    const h = pick(e), u = h ? h.object.userData : {};
+    try{ canvas.setPointerCapture(e.pointerId); }catch{}
+    if (u.kind) ensureAudio();
+    if (u.kind === "pad"){
+      const lz = h.object.worldToLocal(h.point.clone()).z;
+      padDown(u.i, S.fullLevel ? 1 : clamp(1 - (lz + 18.5) / 37 * .9, .15, 1));
+      active.set(e.pointerId, {kind:"pad", i:u.i});
+    } else if (u.kind === "button"){
+      u.down = true;
+      if (u.hold) holdEvent(u, "pointerdown", e.pointerId); else u.el.click();
+      active.set(e.pointerId, {kind:"button", u});
+    } else if (u.kind === "knob"){
+      active.set(e.pointerId, {kind:"knob", k:knobs[u.key], y:e.clientY, v:knobs[u.key].get()});
+    } else if (u.kind === "fader"){
+      active.set(e.pointerId, {kind:"fader", y:e.clientY, v:varGet()});
+    } else if (u.kind === "wheel"){
+      active.set(e.pointerId, {kind:"wheel", last:wheelAngle(e), acc:0});
+    } else if (h && h.object === screen){
+      const px = h.uv.x * lcv.width, py = (1 - h.uv.y) * lcv.height;
+      const hit = Object.entries(fieldRects).find(([, r]) => px >= r.x - 8 && px <= r.x + r.w + 8 && py >= r.y - 8 && py <= r.y + r.h + 8);
+      if (hit) fldEls[hit[0]].click();
+      active.set(e.pointerId, {kind:"none"});
+    } else {
+      anim = null;
+      active.set(e.pointerId, {kind:"orbit", x:e.clientX, y:e.clientY, touch:e.pointerType === "touch", moved:0});
+      host.classList.add("dragging");
+      document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", "false"));
+    }
+    e.preventDefault();
   });
-  stage.addEventListener("pointermove", e => {
-    if (e.pointerId !== id) return;
-    const dy = e.pointerType === "touch" ? 0 : sy - e.clientY; // on touch, vertical drags keep scrolling the page
-    go(x0 + dy * .2, z0 + (e.clientX - sx) * .3, false);
+  let hoverEvt = null;
+  canvas.addEventListener("pointermove", e => {
+    const a = active.get(e.pointerId);
+    if (!a){ if (e.pointerType === "mouse") hoverEvt = e; return; }
+    if (a.kind === "orbit"){
+      const dx = e.clientX - a.x, dy = a.touch ? 0 : e.clientY - a.y;
+      a.x = e.clientX; a.y = e.clientY; a.moved += Math.abs(dx) + Math.abs(dy);
+      cam.az -= dx * .3; cam.el = clamp(cam.el + dy * .25, 6, 89);
+    } else if (a.kind === "knob") a.k.set(clamp(a.v + (a.y - e.clientY) / 160, 0, 1));
+    else if (a.kind === "fader"){ varSet(clamp(a.v + (a.y - e.clientY) / 120, 0, 1)); paintVar(); }
+    else if (a.kind === "wheel"){
+      const ang = wheelAngle(e); let d = ang - a.last; if (d > 180) d -= 360; if (d < -180) d += 360;
+      a.last = ang; wheelRot += d; a.acc += d;
+      while (a.acc >= 14){ dataInc(1); a.acc -= 14; }
+      while (a.acc <= -14){ dataInc(-1); a.acc += 14; }
+    }
   });
-  const end = e => { if (e.pointerId !== id) return; id = null; stage.classList.remove("dragging"); if (Math.abs(e.clientX - sx) + Math.abs(e.clientY - sy) > 20) emit("view", {name:"drag"}); };
-  stage.addEventListener("pointerup", end); stage.addEventListener("pointercancel", end);
-})();
+  const release = e => {
+    const a = active.get(e.pointerId); if (!a) return;
+    active.delete(e.pointerId);
+    if (a.kind === "pad") padUp(a.i);
+    else if (a.kind === "button"){ a.u.down = false; if (a.u.hold) holdEvent(a.u, "pointerup", e.pointerId); }
+    else if (a.kind === "orbit"){ host.classList.remove("dragging"); if (a.moved > 20) emit("view", {name:"drag"}); }
+  };
+  canvas.addEventListener("pointerup", release); canvas.addEventListener("pointercancel", release);
+  canvas.addEventListener("lostpointercapture", release);
+
+  // ---- lesson highlights
+  let hlMeshes = []; const hlFields = new Set(), hlPads = new Set();
+  function highlight(list){
+    hlMeshes.forEach(m => { m.material.emissive.setHex(0); m.material.emissiveIntensity = 0; });
+    hlMeshes = []; hlFields.clear(); hlPads.clear();
+    list.forEach(el => {
+      if (fieldOf.has(el)) hlFields.add(fieldOf.get(el));
+      (elMap.get(el) || []).forEach(o => { if (o.userData.kind === "pad") hlPads.add(o.userData.i); else if (o.material && !Array.isArray(o.material)) hlMeshes.push(o); });
+    });
+  }
+  const bb = new T.Box3(), pv = new T.Vector3();
+  function rectFor(el){
+    const objs = elMap.get(el) || (fieldOf.has(el) ? [screen] : null); if (!objs) return null;
+    const r = canvas.getBoundingClientRect(); let l = Infinity, t = Infinity, rt = -Infinity, b = -Infinity;
+    objs.forEach(o => {
+      bb.setFromObject(o);
+      for (let i = 0; i < 8; i++){
+        pv.set(i & 1 ? bb.max.x : bb.min.x, i & 2 ? bb.max.y : bb.min.y, i & 4 ? bb.max.z : bb.min.z).project(camera);
+        const sx = r.left + (pv.x + 1) / 2 * r.width, sy = r.top + (1 - pv.y) / 2 * r.height;
+        l = Math.min(l, sx); rt = Math.max(rt, sx); t = Math.min(t, sy); b = Math.max(b, sy);
+      }
+    });
+    return {left:l, top:t, right:rt, bottom:b, width:rt - l, height:b - t};
+  }
+
+  // ---- frame loop
+  const glow = new Float32Array(16), held3 = new Set(); let lcdSig = "";
+  function loop(now){
+    requestAnimationFrame(loop);
+    if (anim){
+      const k = Math.min(1, (now - anim.t0) / 750), e = 1 - Math.pow(1 - k, 3);
+      for (const key of ["az", "el", "zoom", "tx", "tz"]) cam[key] = anim.from[key] + (anim.to[key] - anim.from[key]) * e;
+      if (k >= 1) anim = null;
+    }
+    placeCamera();
+    M.position.y = reduceMotion.matches ? 0 : Math.sin(now / 1700) * 2.4;
+    const pulse = .5 + .5 * Math.sin(now / 170);
+    for (let i = 0; i < 16; i++){
+      const pm = padMeshes[i], down = held3.has(i);
+      glow[i] = Math.max(down ? .6 : 0, glow[i] * .9);
+      let col = GLOWHEX[PADS[levels16 ? levelSrc : i].g], amt = glow[i];
+      if (hlPads.has(i) && amt < .15){ col = 0xd9466f; amt = .12 + pulse * .3; }
+      pm.material[0].emissive.setHex(col); pm.material[0].emissiveIntensity = amt * 1.5;
+      pm.material[1].emissive.setHex(col); pm.material[1].emissiveIntensity = amt * .8;
+      pm.position.y += ((pm.userData.baseY - (down ? 1.6 : 0)) - pm.position.y) * .55;
+    }
+    caps.forEach(m => { const u = m.userData; u.group.position.y += ((u.baseY - (u.down ? 1.3 : 0)) - u.group.position.y) * .5; });
+    leds.forEach(l => {
+      const on = l.el.classList.contains("on") && !(l.el.classList.contains("blink") && now % 500 < 250);
+      l.m.material.emissiveIntensity = on ? 2.6 : 0; l.m.material.color.setHex(on ? l.on : 0x5f4f45);
+    });
+    hlMeshes.forEach(m => { m.material.emissive.setHex(0xd9466f); m.material.emissiveIntensity = .12 + pulse * .45; });
+    knobs.cut.spin.rotation.y = (.5 - S.cutoff) * 1.5 * Math.PI;
+    knobs.vol.spin.rotation.y = (.5 - S.volume) * 1.5 * Math.PI;
+    fader.position.copy(at(44, 337 - varGet() * 56, H));
+    wheel.rotation.y = -wheelRot * Math.PI / 180;
+    const rows = lcdRows(), blink = (entry !== "" || hlFields.size) ? Math.floor(now / 400) % 2 : 0;
+    const sig = JSON.stringify(rows) + cur + entry + neg + stepIndex() + [...hlFields].join() + blink + $("#lcdMsg").textContent + tabText();
+    if (sig !== lcdSig){ lcdSig = sig; drawLCD(now, rows); }
+    if (hoverEvt){ const h = pick(hoverEvt); host.classList.toggle("hover", !!(h && (h.object.userData.kind || h.object === screen))); hoverEvt = null; }
+    renderer.render(scene, camera);
+  }
+
+  function paintAll(){ drawArt(); drawFront(); drawRear(); for (let i = 0; i < 16; i++) drawPad(i); lcdSig = ""; }
+  paintAll();
+  if (document.fonts) Promise.all(["700 20px Barlow", "600 20px Barlow", "20px Michroma", "40px VT323"].map(f => document.fonts.load(f))).then(paintAll, paintAll);
+  m3 = {
+    flash(i){ glow[i] = 1; },
+    hold(i, on){ if (on) held3.add(i); else held3.delete(i); },
+    padsChanged(){ for (let i = 0; i < 16; i++) drawPad(i); },
+    setView:setView3, highlight, rectFor,
+  };
+  requestAnimationFrame(loop);
+}
 
 // ---------- boot ----------
 
@@ -1703,8 +2350,7 @@ updateLcd();
 updateTransport();
 paintVar();
 extrude();
-measureBezel();
-setView("three", false);
+init3D();
 })();
 </script>
 

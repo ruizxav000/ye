@@ -1,6 +1,8 @@
 # MPC 2000XL
 
-A 3D browser recreation of the Akai MPC 2000XL. It is built to the real proportions (about 408 × 375 × 85 mm) and floats against a "Runaway"-style dusk sky. Use the Three-quarter, Front, Top down and Back views, or drag to spin it all the way around; the rear panel has the jacks. It has a synthesized kit (808 kick and boom, snare, clap, hats, keys,
+A 3D browser recreation of the Akai MPC 2000XL. It is a real-time 3D model (three.js) built to the real proportions, about 408 × 375 × 86 mm, floating against a "Runaway"-style dusk sky. Buttons sit in recessed openings, pads are rubber blocks that light up, knobs and the data wheel are knurled, and the rear panel has real female jacks, MIDI sockets, RCA, SCSI and the power inlet. Use the Three-quarter, Play, Pads and Back views, or drag to spin it.
+
+The page loads three.js from cdnjs, so it needs an internet connection the first time it opens. It has a synthesized kit (808 kick and boom, snare, clap, hats, keys,
 choir, brass, orchestra hit and more), live loop recording quantized to 16th notes,
 note repeat, swing, four sequences, a step editor, and sample loading and chopping.
 
